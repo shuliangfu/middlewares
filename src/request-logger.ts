@@ -82,11 +82,11 @@ export function requestLogger(
     if (format === "json") {
       logger[level](JSON.stringify({ type: "request", ...requestInfo }));
     } else {
-      logger[level](
-        `${ctx.method} ${ctx.path}${
-          ctx.query ? `?${new URLSearchParams(ctx.query).toString()}` : ""
-        }`,
-      );
+      // 仅当存在查询参数时才追加 ?xxx，避免根路径显示为 "GET /?"
+      const queryString = ctx.query && Object.keys(ctx.query).length > 0
+        ? `?${new URLSearchParams(ctx.query).toString()}`
+        : "";
+      logger[level](`${ctx.method} ${ctx.path}${queryString}`);
     }
 
     // 执行下一个中间件
