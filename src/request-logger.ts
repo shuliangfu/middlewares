@@ -23,6 +23,8 @@ export interface RequestLoggerOptions {
   includeHeaders?: boolean;
   /** 是否包含请求体 */
   includeBody?: boolean;
+  /** 是否输出详细日志（含 requestId、query、userAgent，便于 prod 排查） */
+  detailed?: boolean;
   /** 跳过日志的路径（返回 true 则不记录，如过滤 /.well-known/ 等内部请求） */
   skip?: (ctx: HttpContext) => boolean;
 }
@@ -50,6 +52,7 @@ export function requestLogger(
     format = "text",
     includeHeaders: _includeHeaders = false,
     includeBody: _includeBody = false,
+    detailed = false,
   } = options;
 
   return async (ctx: HttpContext, next: () => Promise<void>): Promise<void> => {
@@ -74,8 +77,27 @@ export function requestLogger(
       duration: `${duration}ms`,
     };
 
+    if (detailed) {
+      const state = (ctx as { state?: { requestId?: string } }).state;
+      if (state?.requestId) responseInfo.requestId = state.requestId;
+      const search = ctx.url?.search?.trim();
+      if (search) responseInfo.query = search;
+      const ua = ctx.request?.headers?.get?.("user-agent");
+      if (ua) responseInfo.userAgent = ua;
+    }
+
     if (format === "json") {
       logger[level](JSON.stringify({ type: "response", ...responseInfo }));
+    } else if (detailed && Object.keys(responseInfo).length > 4) {
+      const parts = [`${ctx.method} ${ctx.path} ${status} ${duration}ms`];
+      if (responseInfo.requestId) {
+        parts.push(`requestId=${responseInfo.requestId}`);
+      }
+      if (responseInfo.query) parts.push(`query=${responseInfo.query}`);
+      if (responseInfo.userAgent) {
+        parts.push(`ua=${String(responseInfo.userAgent).slice(0, 60)}`);
+      }
+      logger[level](parts.join(" "));
     } else {
       logger[level](
         `${ctx.method} ${ctx.path} ${status} ${duration}ms`,
