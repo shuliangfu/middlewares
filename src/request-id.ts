@@ -49,7 +49,7 @@ export function requestId(
   } = options;
 
   return async (ctx: HttpContext, next: () => Promise<void>): Promise<void> => {
-    // 尝试从请求头中读取 Request ID
+    // 尝试从请求头中读取 Request ID（Request.headers 不可变，不能 set，后续从 ctx.state.requestId 获取）
     let requestId: string;
     if (readFromHeader) {
       const existingId = ctx.headers.get(headerName);
@@ -57,12 +57,9 @@ export function requestId(
         requestId = existingId;
       } else {
         requestId = generateId();
-        // 将 Request ID 添加到请求头中（供后续中间件使用）
-        ctx.headers.set(headerName, requestId);
       }
     } else {
       requestId = generateId();
-      ctx.headers.set(headerName, requestId);
     }
 
     // 将 Request ID 统一存储在 ctx.state 下（供后续中间件和路由处理器使用）
