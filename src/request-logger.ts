@@ -48,8 +48,8 @@ export function requestLogger(
     logger = createLogger(),
     level = "info",
     format = "text",
-    includeHeaders = false,
-    includeBody = false,
+    includeHeaders: _includeHeaders = false,
+    includeBody: _includeBody = false,
   } = options;
 
   return async (ctx: HttpContext, next: () => Promise<void>): Promise<void> => {
@@ -60,36 +60,7 @@ export function requestLogger(
 
     const startTime = Date.now();
 
-    // 记录请求信息
-    const requestInfo: Record<string, unknown> = {
-      method: ctx.method,
-      path: ctx.path,
-      query: ctx.query,
-    };
-
-    if (includeHeaders) {
-      const headers: Record<string, string> = {};
-      ctx.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-      requestInfo.headers = headers;
-    }
-
-    if (includeBody && ctx.body) {
-      requestInfo.body = ctx.body;
-    }
-
-    if (format === "json") {
-      logger[level](JSON.stringify({ type: "request", ...requestInfo }));
-    } else {
-      // 仅当存在查询参数时才追加 ?xxx，避免根路径显示为 "GET /?"
-      const queryString = ctx.query && Object.keys(ctx.query).length > 0
-        ? `?${new URLSearchParams(ctx.query).toString()}`
-        : "";
-      logger[level](`${ctx.method} ${ctx.path}${queryString}`);
-    }
-
-    // 执行下一个中间件
+    // 执行下一个中间件（仅记录响应日志，不记录请求日志，避免每条请求出现两行）
     await next();
 
     // 记录响应信息
