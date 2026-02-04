@@ -4,6 +4,8 @@
  * 自动压缩 HTTP 响应体，支持 gzip 和 brotli 压缩算法
  */
 
+import { compress as brotliCompress } from "brotli";
+import { gzip } from "pako";
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
@@ -46,12 +48,7 @@ function defaultFilter(contentType: string): boolean {
  * @param level 压缩级别
  * @returns 压缩后的数据
  */
-async function compressGzip(
-  data: Uint8Array,
-  level: number = 6,
-): Promise<Uint8Array> {
-  // 使用 pako 库进行 gzip 压缩（跨运行时兼容）
-  const { gzip } = await import("pako");
+function compressGzip(data: Uint8Array, level: number = 6): Uint8Array {
   return gzip(data, { level });
 }
 
@@ -101,17 +98,9 @@ async function compressBrotli(data: Uint8Array): Promise<Uint8Array> {
     }
   }
 
-  // 使用 npm 包进行 brotli 压缩（跨运行时兼容）
+  // 使用 brotli 包进行压缩（跨运行时兼容）
   try {
-    // 使用 npm:brotli 包（支持 Deno 和 Bun）
-    const brotliModule = await import("brotli");
-
-    const { compress } = brotliModule;
-    if (typeof compress !== "function") {
-      throw new Error("Brotli compress function not found");
-    }
-
-    const result = compress(data);
+    const result = brotliCompress(data);
     // brotli 包返回的是 Buffer 或 Uint8Array
     return result instanceof Uint8Array ? result : new Uint8Array(result);
   } catch (error) {

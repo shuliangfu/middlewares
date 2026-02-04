@@ -1,6 +1,6 @@
 {
   "name": "@dreamer/middlewares",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "license": "MIT",
   "description": "兼容 Deno 和 Bun 的 HTTP 中间件库，提供 17 个开箱即用中间件，可与 @dreamer/server 或 HttpContext 兼容框架无缝集成",
   "exports": {
@@ -37,7 +37,7 @@
     ]
   },
   "imports": {
-    "@dreamer/server": "jsr:@dreamer/server@^1.0.0-beta.17",
+    "@dreamer/server": "jsr:@dreamer/server@1.0.0-beta.22",
     "@dreamer/middleware": "jsr:@dreamer/middleware@^1.0.0-beta.2",
     "@dreamer/logger": "jsr:@dreamer/logger@^1.0.0-beta.7",
     "@dreamer/test": "jsr:@dreamer/test@^1.0.0-beta.40",
