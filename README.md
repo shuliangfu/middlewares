@@ -1,6 +1,6 @@
 # @dreamer/middlewares
 
-> 兼容 Deno 和 Bun 的 HTTP 中间件库，提供 17 个开箱即用中间件，可与 @dreamer/server 或 HttpContext 兼容框架无缝集成
+> HTTP middleware library compatible with Deno and Bun. Provides 17 ready-to-use middlewares that integrate seamlessly with @dreamer/server or any HttpContext-compatible framework.
 
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
@@ -8,13 +8,13 @@
 
 ---
 
-## 🎯 功能
+## 🎯 Features
 
-提供 17 个开箱即用的 HTTP 中间件，涵盖请求解析、跨域、安全、限流、日志、缓存、静态文件等场景，可与 @dreamer/server 或任意 HttpContext 兼容框架无缝集成。
+Provides 17 ready-to-use HTTP middlewares covering request parsing, CORS, security, rate limiting, logging, caching, static files, and more. Integrates seamlessly with @dreamer/server or any HttpContext-compatible framework.
 
 ---
 
-## 📦 安装
+## 📦 Installation
 
 ### Deno
 
@@ -30,56 +30,56 @@ bunx jsr add @dreamer/middlewares
 
 ---
 
-## 🌍 环境兼容性
+## 🌍 Environment Compatibility
 
-| 环境       | 版本要求 | 状态                                                                 |
-| ---------- | -------- | -------------------------------------------------------------------- |
-| **Deno**   | 2.6+     | ✅ 完全支持                                                          |
-| **Bun**    | 1.3.5+   | ✅ 完全支持                                                          |
-| **服务端** | -        | ✅ 支持（兼容 Deno 和 Bun，需配合 @dreamer/server 或兼容框架使用） |
-| **客户端** | -        | ❌ 不适用（仅服务端 HTTP 中间件）                                    |
-| **依赖**   | -        | 📦 @dreamer/server（类型）、@dreamer/middleware、@dreamer/logger 等  |
-
----
-
-## ✨ 特性
-
-- **请求处理**：
-  - body-parser：JSON、URL 编码表单、文本、raw 解析
-  - request-validator：请求体/查询/头校验与大小限制
-  - request-signature：HMAC 请求签名校验
-- **跨域与安全**：
-  - cors：跨域配置（origin、methods、credentials、预检）
-  - csrf：CSRF 防护（双 cookie / header 校验）
-  - security-headers：CSP、HSTS、X-Frame-Options 等安全头
-- **可观测与限流**：
-  - request-id：请求 ID（统一存于 ctx.state）
-  - request-logger：请求/响应日志
-  - metrics：请求数、延迟、状态码分布
-  - performance-analyzer：中间件耗时分析
-  - rate-limit：内存限流
-- **响应与资源**：
-  - compression：gzip/brotli 响应压缩
-  - response-cache：响应缓存与 ETag/Last-Modified
-  - static-files：静态文件服务（含 LRU 文件缓存）
-  - timeout：请求超时
-- **错误与健康**：
-  - error-handler：统一错误处理与格式化
-  - health-check：健康检查端点
+| Environment | Version | Status |
+|-------------|---------|--------|
+| **Deno** | 2.6+ | ✅ Fully supported |
+| **Bun** | 1.3.5+ | ✅ Fully supported |
+| **Server** | - | ✅ Supported (works with Deno and Bun, requires @dreamer/server or compatible framework) |
+| **Client** | - | ❌ N/A (server-side HTTP middlewares only) |
+| **Dependencies** | - | 📦 @dreamer/server (types), @dreamer/middleware, @dreamer/logger, etc. |
 
 ---
 
-## 🎯 使用场景
+## ✨ Capabilities
 
-- 与 @dreamer/server 或兼容 HttpContext 的框架一起使用
-- 为 HTTP 应用添加 CORS、CSRF、安全头、限流、请求日志
-- 解析请求体、校验请求、验证签名
-- 提供静态文件、响应缓存、压缩、超时与健康检查
-- 统一错误响应格式与错误日志（含 ctx.state.requestId）
+- **Request handling**:
+  - body-parser: JSON, URL-encoded form, text, raw parsing
+  - request-validator: Request body/query/header validation and size limits
+  - request-signature: HMAC request signature verification
+- **CORS & security**:
+  - cors: CORS configuration (origin, methods, credentials, preflight)
+  - csrf: CSRF protection (dual cookie / header verification)
+  - security-headers: CSP, HSTS, X-Frame-Options, and other security headers
+- **Observability & rate limiting**:
+  - request-id: Request ID (stored in ctx.state)
+  - request-logger: Request/response logging
+  - metrics: Request count, latency, status code distribution
+  - performance-analyzer: Middleware duration analysis
+  - rate-limit: In-memory rate limiting
+- **Response & resources**:
+  - compression: gzip/brotli response compression
+  - response-cache: Response caching with ETag/Last-Modified
+  - static-files: Static file serving (with LRU file cache)
+  - timeout: Request timeout
+- **Error & health**:
+  - error-handler: Unified error handling and formatting
+  - health-check: Health check endpoint
 
 ---
 
-## 🚀 快速开始
+## 🎯 Use Cases
+
+- Use with @dreamer/server or any HttpContext-compatible framework
+- Add CORS, CSRF, security headers, rate limiting, and request logging to HTTP apps
+- Parse request body, validate requests, verify signatures
+- Serve static files, response cache, compression, timeout, and health checks
+- Unified error response format and error logging (including ctx.state.requestId)
+
+---
+
+## 🚀 Quick Start
 
 ```typescript
 import { Server } from "@dreamer/server";
@@ -97,9 +97,9 @@ await server.start();
 
 ---
 
-## 🎨 使用示例
+## 🎨 Examples
 
-### 错误处理与健康检查
+### Error handling and health check
 
 ```typescript
 import { Http } from "@dreamer/server";
@@ -110,7 +110,7 @@ app.use(healthCheck({ path: "/health" }));
 app.useError(errorHandler({ isDev: false }));
 ```
 
-### 限流与请求签名
+### Rate limiting and request signature
 
 ```typescript
 import { rateLimit, requestSignature, generateRequestSignature } from "@dreamer/middlewares";
@@ -120,10 +120,10 @@ app.use(requestSignature({
   secret: "your-secret",
   getRawBody: (ctx) => Promise.resolve(JSON.stringify(ctx.body ?? "")),
 }));
-// 客户端可使用 generateRequestSignature 生成签名
+// Client can use generateRequestSignature to generate signatures
 ```
 
-### 静态文件与响应缓存
+### Static files and response cache
 
 ```typescript
 import { staticFiles, responseCache } from "@dreamer/middlewares";
@@ -134,69 +134,69 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ---
 
-## 📚 API 文档
+## 📚 API Reference
 
-### 内置中间件一览
+### Built-in middlewares
 
-| 中间件               | 导出名            | 说明                         |
-| -------------------- | ----------------- | ---------------------------- |
-| Body Parser         | `bodyParser`      | 解析 JSON/表单/文本/raw      |
-| Compression         | `compression`     | gzip/brotli 响应压缩          |
-| CORS                | `cors`            | 跨域                         |
-| CSRF                | `csrf`            | CSRF 防护                    |
-| Error Handler       | `errorHandler`    | 统一错误处理（ErrorMiddleware） |
-| Health Check        | `healthCheck`     | 健康检查                     |
-| Metrics             | `metrics`         | 请求指标，getMetricsStats/resetMetrics |
-| Performance Analyzer| `performanceAnalyzer` | 性能分析，clearPerformanceData/getPerformanceStats |
-| Rate Limit          | `rateLimit`       | 限流                         |
-| Request ID          | `requestId`       | 请求 ID（写入 ctx.state）    |
-| Request Logger      | `requestLogger`   | 请求日志                     |
-| Request Signature   | `requestSignature`、`generateRequestSignature` | 请求签名校验与生成 |
-| Request Validator   | `requestValidator`| 请求校验                     |
-| Response Cache      | `responseCache`   | 响应缓存，clearResponseCache/getResponseCacheStats |
-| Security Headers    | `securityHeaders` | 安全头                       |
-| Static Files        | `staticFiles`    | 静态文件                     |
-| Timeout             | `timeout`         | 请求超时                     |
+| Middleware | Export Name | Description |
+|------------|-------------|-------------|
+| Body Parser | `bodyParser` | Parse JSON/form/text/raw |
+| Compression | `compression` | gzip/brotli response compression |
+| CORS | `cors` | Cross-origin |
+| CSRF | `csrf` | CSRF protection |
+| Error Handler | `errorHandler` | Unified error handling (ErrorMiddleware) |
+| Health Check | `healthCheck` | Health check |
+| Metrics | `metrics` | Request metrics, getMetricsStats/resetMetrics |
+| Performance Analyzer | `performanceAnalyzer` | Performance analysis, clearPerformanceData/getPerformanceStats |
+| Rate Limit | `rateLimit` | Rate limiting |
+| Request ID | `requestId` | Request ID (writes to ctx.state) |
+| Request Logger | `requestLogger` | Request logging |
+| Request Signature | `requestSignature`, `generateRequestSignature` | Request signature verification and generation |
+| Request Validator | `requestValidator` | Request validation |
+| Response Cache | `responseCache` | Response cache, clearResponseCache/getResponseCacheStats |
+| Security Headers | `securityHeaders` | Security headers |
+| Static Files | `staticFiles` | Static files |
+| Timeout | `timeout` | Request timeout |
 
-### 类型导出
+### Type exports
 
-- `BodyParserOptions`、`CompressionOptions`、`CorsOptions`、`CsrfOptions`、`CsrfTokenGenerator`
-- `ErrorHandlerOptions`、`HealthCheckOptions`、`MetricsOptions`、`PerformanceAnalyzerOptions`
-- `RateLimitOptions`、`RequestIdOptions`、`RequestLoggerOptions`、`RequestSignatureOptions`、`HmacAlgorithm`
-- `RequestValidatorOptions`、`ValidationRule`、`ResponseCacheOptions`
-- `SecurityHeadersOptions`、`DynamicSecurityPolicy`、`StaticFilesOptions`、`TimeoutOptions`
-
----
-
-## 📊 测试报告
-
-- **总测试数**：192
-- **通过**：192 ✅
-- **失败**：0
-- **通过率**：100%
-- **测试时间**：2026-02-03
-- **详情**：[TEST_REPORT.md](./TEST_REPORT.md)
+- `BodyParserOptions`, `CompressionOptions`, `CorsOptions`, `CsrfOptions`, `CsrfTokenGenerator`
+- `ErrorHandlerOptions`, `HealthCheckOptions`, `MetricsOptions`, `PerformanceAnalyzerOptions`
+- `RateLimitOptions`, `RequestIdOptions`, `RequestLoggerOptions`, `RequestSignatureOptions`, `HmacAlgorithm`
+- `RequestValidatorOptions`, `ValidationRule`, `ResponseCacheOptions`
+- `SecurityHeadersOptions`, `DynamicSecurityPolicy`, `StaticFilesOptions`, `TimeoutOptions`
 
 ---
 
-## 📝 注意事项
+## 📊 Test Report
 
-- 本库仅提供中间件实现，需与 @dreamer/server 或兼容 `Middleware<HttpContext>` 的框架一起使用。
-- Request ID 统一存放在 `ctx.state.requestId`，错误处理等中间件从该处读取。
-- 静态文件、响应缓存等使用 @dreamer/runtime-adapter，保证 Deno/Bun 兼容。
-- 部分中间件（如 request-logger、error-handler）可选传入 `logger`，否则使用默认 createLogger()。
-
----
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request。
+- **Total tests**: 192
+- **Passed**: 192 ✅
+- **Failed**: 0
+- **Pass rate**: 100%
+- **Test date**: 2026-02-03
+- **Details**: [TEST_REPORT.md](./TEST_REPORT.md)
 
 ---
 
-## 📄 许可证
+## 📝 Notes
 
-MIT License - 详见 [LICENSE.md](./LICENSE.md)
+- This library provides middleware implementations only. It must be used with @dreamer/server or a framework compatible with `Middleware<HttpContext>`.
+- Request ID is stored in `ctx.state.requestId`; error handler and other middlewares read from there.
+- Static files, response cache, etc. use @dreamer/runtime-adapter for Deno/Bun compatibility.
+- Some middlewares (e.g. request-logger, error-handler) accept an optional `logger`; otherwise they use the default createLogger().
+
+---
+
+## 🤝 Contributing
+
+Issues and Pull Requests are welcome.
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE.md](./LICENSE.md)
 
 ---
 
