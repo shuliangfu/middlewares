@@ -2,6 +2,8 @@
 
 > 兼容 Deno 和 Bun 的 HTTP 中间件库，提供 17 个开箱即用中间件，可与 @dreamer/server 或 HttpContext 兼容框架无缝集成
 
+[English](./README.md) | 中文 (Chinese)
+
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
 [![Tests](https://img.shields.io/badge/tests-192%20passed-brightgreen)](./TEST_REPORT.md)
