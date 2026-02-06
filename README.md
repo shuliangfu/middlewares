@@ -2,6 +2,8 @@
 
 > HTTP middleware library compatible with Deno and Bun. Provides 17 ready-to-use middlewares that integrate seamlessly with @dreamer/server or any HttpContext-compatible framework.
 
+English | [中文 (Chinese)](./README-zh.md)
+
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
 [![Tests](https://img.shields.io/badge/tests-192%20passed-brightgreen)](./TEST_REPORT.md)
