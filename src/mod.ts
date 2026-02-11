@@ -1,7 +1,11 @@
 /**
- * 中间件模块
+ * @module @dreamer/middlewares
  *
- * 导出所有内置中间件
+ * Main entry point. Exports all built-in HTTP middlewares: body parser, compression,
+ * CORS, CSRF, error handler, health check, metrics, performance analyzer, rate limit,
+ * request id, request logger, request signature, request validator, response cache,
+ * security headers, static files, and timeout. Compatible with @dreamer/server and
+ * HttpContext-based frameworks.
  */
 
 export { bodyParser, type BodyParserOptions } from "./body-parser.ts";

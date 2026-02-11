@@ -1,14 +1,15 @@
 /**
- * 请求限流中间件
+ * @module @dreamer/middlewares/rate-limit
  *
- * 限制每个 IP 地址的请求频率，防止滥用
+ * Rate limit middleware. Limits request frequency per key (e.g. IP). Exports
+ * rateLimit, RateLimitOptions, and RateLimitMiddleware.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 限流配置选项
+ * Options for the rate limit middleware (window, max requests, key generator, etc.).
  */
 export interface RateLimitOptions {
   /** 时间窗口（毫秒，默认：60000，即 1 分钟） */
@@ -61,7 +62,7 @@ interface RateLimitRecord {
  * ```
  */
 /**
- * 限流中间件实例（包含清理方法）
+ * Rate limit middleware instance; extends Middleware and may expose cleanup for tests.
  */
 export interface RateLimitMiddleware extends Middleware<HttpContext> {
   /** 清理定时器（用于测试） */

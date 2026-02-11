@@ -1,20 +1,20 @@
 /**
- * CSRF 保护中间件
+ * @module @dreamer/middlewares/csrf
  *
- * 防止跨站请求伪造（CSRF）攻击
- * 使用 Double Submit Cookie 模式
+ * CSRF protection middleware using double-submit cookie. Exports csrf,
+ * CsrfOptions, and CsrfTokenGenerator.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * CSRF Token 生成函数类型
+ * Function type that generates a CSRF token string (e.g. random bytes).
  */
 export type CsrfTokenGenerator = () => string;
 
 /**
- * CSRF 保护配置选项
+ * Options for CSRF middleware (cookie/header names, cookie options, skip/verify logic).
  */
 export interface CsrfOptions {
   /** Cookie 名称（默认：_csrf） */

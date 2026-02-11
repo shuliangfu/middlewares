@@ -1,19 +1,20 @@
 /**
- * 请求签名验证中间件
+ * @module @dreamer/middlewares/request-signature
  *
- * 使用 HMAC 签名验证请求，防止请求篡改
+ * Request signature middleware. Validates HMAC-signed requests. Exports
+ * requestSignature, generateRequestSignature, HmacAlgorithm, and options.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * HMAC 签名算法类型
+ * Supported HMAC algorithm names for request signing (HS256, HS384, HS512).
  */
 export type HmacAlgorithm = "HS256" | "HS384" | "HS512";
 
 /**
- * 请求签名配置选项
+ * Options for request signature middleware (secret, algorithm, headers, expiry, etc.).
  */
 export interface RequestSignatureOptions {
   /** 密钥（字符串或 CryptoKey） */
@@ -339,7 +340,7 @@ export function requestSignature(
 }
 
 /**
- * 生成请求签名（用于客户端）
+ * Generates HMAC signature and timestamp for a request (for use by clients).
  *
  * @param method HTTP 方法
  * @param path 请求路径

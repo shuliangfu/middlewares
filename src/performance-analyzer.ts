@@ -1,7 +1,9 @@
 /**
- * 开发模式性能分析中间件
+ * @module @dreamer/middlewares/performance-analyzer
  *
- * 在开发模式下收集性能数据，提供慢请求和慢中间件分析
+ * Performance analyzer middleware. Collects timing data in development for
+ * slow-request and slow-middleware analysis. Exports performanceAnalyzer,
+ * getPerformanceStats, clearPerformanceData, and PerformanceAnalyzerOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
@@ -48,7 +50,7 @@ interface RequestRecord {
 }
 
 /**
- * 性能分析配置选项
+ * Options for performance analyzer (thresholds, endpoint, maxRecords, logSlowRequests).
  */
 export interface PerformanceAnalyzerOptions {
   /** 是否启用（默认：true，仅在开发模式） */
@@ -260,7 +262,7 @@ function generatePerformanceReport(): string {
 }
 
 /**
- * 创建性能分析中间件
+ * Creates performance analyzer middleware. Records request and middleware timings in development.
  *
  * @param options 配置选项
  * @returns 性能分析中间件函数
@@ -381,9 +383,9 @@ export function performanceAnalyzer(
 }
 
 /**
- * 获取性能统计数据
+ * Returns performance stats: request count, slow requests, middleware timings.
  *
- * @returns 性能统计数据
+ * @returns Object with totalRequests, slowRequests, requests, middlewareStats, etc.
  */
 export function getPerformanceStats(): {
   totalRequests: number;
@@ -410,7 +412,7 @@ export function getPerformanceStats(): {
 }
 
 /**
- * 清空性能数据
+ * Clears all collected performance data (requests, slow list, middleware stats).
  */
 export function clearPerformanceData(): void {
   performanceData = {

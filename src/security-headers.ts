@@ -1,22 +1,22 @@
 /**
- * 安全头中间件
+ * @module @dreamer/middlewares/security-headers
  *
- * 设置 HTTP 安全响应头，提高应用安全性
+ * Security headers middleware. Sets HTTP security response headers. Exports
+ * securityHeaders, DynamicSecurityPolicy, and SecurityHeadersOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 动态安全策略函数
- * 根据请求上下文动态决定安全头配置
+ * Function that returns security header config per request (e.g. CSP) from HttpContext.
  */
 export type DynamicSecurityPolicy = (
   ctx: HttpContext,
 ) => Partial<SecurityHeadersOptions> | Promise<Partial<SecurityHeadersOptions>>;
 
 /**
- * 安全头配置选项
+ * Options for security headers middleware (frame options, CSP, HSTS, etc.).
  */
 export interface SecurityHeadersOptions {
   /** 是否启用 X-Frame-Options（默认：true） */

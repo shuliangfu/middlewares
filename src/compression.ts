@@ -1,7 +1,8 @@
 /**
- * 响应压缩中间件
+ * @module @dreamer/middlewares/compression
  *
- * 自动压缩 HTTP 响应体，支持 gzip 和 brotli 压缩算法
+ * Response compression middleware. Compresses HTTP response body with gzip and
+ * optional Brotli. Exports compression and CompressionOptions.
  */
 
 import { compress as brotliCompress } from "brotli";
@@ -10,7 +11,7 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 压缩配置选项
+ * Options for response compression (level, threshold, filter, enableBrotli).
  */
 export interface CompressionOptions {
   /** 压缩级别（1-9，默认：6，仅适用于 gzip） */

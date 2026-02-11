@@ -1,7 +1,8 @@
 /**
- * 响应缓存中间件
+ * @module @dreamer/middlewares/response-cache
  *
- * 提供 HTTP 响应缓存功能，减少重复计算，提升 API 响应速度
+ * Response cache middleware. Caches HTTP responses to speed up APIs. Exports
+ * responseCache, clearResponseCache, getResponseCacheStats, and options.
  */
 
 import type { Middleware } from "@dreamer/middleware";
@@ -184,7 +185,7 @@ class ResponseCache {
 }
 
 /**
- * 响应缓存配置选项
+ * Options for response cache (cacheControl, maxAge, keyGenerator, shouldCache, etc.).
  */
 export interface ResponseCacheOptions {
   /** 缓存策略（public、private、no-cache，默认：public） */
@@ -287,7 +288,7 @@ function defaultShouldSkip(ctx: HttpContext): boolean {
 const cacheInstances = new Map<string, ResponseCache>();
 
 /**
- * 创建响应缓存中间件
+ * Creates response cache middleware. Caches HTTP responses by key for faster repeat requests.
  *
  * @param options 响应缓存配置选项
  * @returns 响应缓存中间件函数
@@ -446,10 +447,10 @@ export function responseCache(
 }
 
 /**
- * 获取响应缓存统计信息
+ * Returns stats for the response cache instance matching the given options (size, count, usage).
  *
- * @param options 缓存配置选项（用于定位缓存实例）
- * @returns 缓存统计信息
+ * @param options Cache options used to identify the cache instance.
+ * @returns Cache statistics object (size, count, maxSize, usage).
  */
 export function getResponseCacheStats(
   options: ResponseCacheOptions = {},
@@ -476,9 +477,9 @@ export function getResponseCacheStats(
 }
 
 /**
- * 清空响应缓存
+ * Clears response cache: for the instance matching options, or all instances if options omitted.
  *
- * @param options 缓存配置选项（用于定位缓存实例，如果为空则清空所有）
+ * @param options Optional cache options to clear one instance; omit to clear all.
  */
 export function clearResponseCache(
   options?: ResponseCacheOptions,
