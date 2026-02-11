@@ -1,14 +1,15 @@
 /**
- * 请求超时中间件
+ * @module @dreamer/middlewares/timeout
  *
- * 为请求设置超时时间，防止长时间运行的请求阻塞服务器
+ * Request timeout middleware. Aborts long-running requests. Exports
+ * timeout and TimeoutOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 超时配置选项
+ * Options for request timeout (timeout ms, message, statusCode, skip).
  */
 export interface TimeoutOptions {
   /** 超时时间（毫秒，默认：30000，即 30 秒） */
@@ -22,7 +23,7 @@ export interface TimeoutOptions {
 }
 
 /**
- * 创建请求超时中间件
+ * Creates request timeout middleware. Aborts requests after a given duration.
  *
  * @param options 超时配置选项
  * @returns 超时中间件函数

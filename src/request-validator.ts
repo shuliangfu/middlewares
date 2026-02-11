@@ -1,14 +1,15 @@
 /**
- * 请求验证中间件
+ * @module @dreamer/middlewares/request-validator
  *
- * 提供请求大小限制、参数验证等功能
+ * Request validator middleware. Request size limits and parameter validation.
+ * Exports requestValidator, ValidationRule, and RequestValidatorOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 验证规则接口
+ * Single validation rule: field name, validate function, optional message and required flag.
  */
 export interface ValidationRule {
   /** 字段名称 */
@@ -22,7 +23,7 @@ export interface ValidationRule {
 }
 
 /**
- * 请求验证配置选项
+ * Options for request validator (body/header/URL limits, rules, custom validate/skip).
  */
 export interface RequestValidatorOptions {
   /** 请求体大小限制（字节，默认：1MB） */

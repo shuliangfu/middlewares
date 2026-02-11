@@ -1,14 +1,15 @@
 /**
- * Request ID 追踪中间件
+ * @module @dreamer/middlewares/request-id
  *
- * 为每个请求生成唯一 ID，便于日志追踪和问题排查
+ * Request ID middleware. Assigns a unique ID per request for tracing and
+ * debugging. Exports requestId and RequestIdOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Request ID 配置选项
+ * Options for request ID middleware (header name, generator, readFromHeader, etc.).
  */
 export interface RequestIdOptions {
   /** 请求头名称（默认：X-Request-ID） */
@@ -22,7 +23,7 @@ export interface RequestIdOptions {
 }
 
 /**
- * 创建 Request ID 中间件
+ * Creates request ID middleware. Assigns or reads a unique ID per request.
  *
  * @param options 配置选项
  * @returns Request ID 中间件函数

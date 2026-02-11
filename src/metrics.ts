@@ -1,7 +1,8 @@
 /**
- * Metrics/Monitoring 中间件
+ * @module @dreamer/middlewares/metrics
  *
- * 收集请求统计信息，提供 Prometheus 格式的指标
+ * Metrics middleware. Collects request stats and exposes Prometheus-style
+ * metrics. Exports metrics, getMetricsStats, resetMetrics, and MetricsOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
@@ -45,7 +46,7 @@ interface RequestStats {
 }
 
 /**
- * Metrics 配置选项
+ * Options for metrics middleware (endpoint, percentiles, maxSamples, extractLabels).
  */
 export interface MetricsOptions {
   /** 是否启用指标收集（默认：true） */
@@ -81,7 +82,7 @@ let globalStats: RequestStats = {
 };
 
 /**
- * 创建 Metrics 中间件
+ * Creates metrics middleware. Collects request stats and serves Prometheus metrics.
  *
  * @param options 配置选项
  * @returns Metrics 中间件函数
@@ -312,14 +313,16 @@ function generatePrometheusMetrics(includePercentiles: boolean): string {
 }
 
 /**
- * 获取当前统计信息（用于调试）
+ * Returns current request metrics (total, success, errors, response time). For debugging/monitoring.
+ *
+ * @returns Current request statistics snapshot.
  */
 export function getMetricsStats(): RequestStats {
   return { ...globalStats };
 }
 
 /**
- * 重置统计信息
+ * Resets all metrics counters and response-time stats to initial values.
  */
 export function resetMetrics(): void {
   globalStats = {

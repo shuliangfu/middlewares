@@ -1,7 +1,8 @@
 /**
- * 静态文件中间件
+ * @module @dreamer/middlewares/static-files
  *
- * 提供静态文件服务
+ * Static files middleware. Serves static assets from a directory. Exports
+ * staticFiles and StaticFilesOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
@@ -16,7 +17,7 @@ import type { HttpContext } from "@dreamer/server";
 import { FileCache } from "./file-cache.ts";
 
 /**
- * 静态文件配置选项
+ * Options for static files middleware (root, prefix, index, cache, maxAge, etc.).
  */
 export interface StaticFilesOptions {
   /** 静态文件根目录 */
@@ -42,7 +43,7 @@ export interface StaticFilesOptions {
 }
 
 /**
- * 创建静态文件中间件
+ * Creates static files middleware. Serves files from a directory with optional cache.
  *
  * @param options 静态文件配置选项
  * @returns 静态文件中间件函数

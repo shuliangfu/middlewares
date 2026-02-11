@@ -1,14 +1,15 @@
 /**
- * CORS 中间件
+ * @module @dreamer/middlewares/cors
  *
- * 处理跨域请求
+ * CORS middleware. Handles cross-origin requests and preflight. Exports cors
+ * and CorsOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * CORS 配置选项
+ * Options for CORS middleware (origin, methods, headers, credentials, maxAge).
  */
 export interface CorsOptions {
   /** 允许的源（字符串、字符串数组或函数） */

@@ -1,14 +1,15 @@
 /**
- * 健康检查中间件
+ * @module @dreamer/middlewares/health-check
  *
- * 提供健康检查端点，用于监控和负载均衡器
+ * Health check middleware. Exposes a configurable health endpoint for monitoring
+ * and load balancers. Exports healthCheck and HealthCheckOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 健康检查配置选项
+ * Options for health check middleware (path, custom check function).
  */
 export interface HealthCheckOptions {
   /** 健康检查路径（默认：/health） */
@@ -20,7 +21,7 @@ export interface HealthCheckOptions {
 }
 
 /**
- * 创建健康检查中间件
+ * Creates health check middleware. Serves a configurable health endpoint.
  *
  * @param options 健康检查配置选项
  * @returns 健康检查中间件函数

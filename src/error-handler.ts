@@ -1,7 +1,8 @@
 /**
- * 错误处理中间件
+ * @module @dreamer/middlewares/error-handler
  *
- * 统一错误处理、错误响应格式化、错误日志记录
+ * Error handler middleware. Unified error handling, response formatting, and
+ * logging. Exports errorHandler and ErrorHandlerOptions.
  */
 
 import type { Logger } from "@dreamer/logger";
@@ -10,7 +11,7 @@ import type { ErrorMiddleware } from "@dreamer/middleware";
 import type { HttpContext, HttpError } from "@dreamer/server";
 
 /**
- * 错误处理配置选项
+ * Options for error handler (logger, isDev, includeDetails, formatError, etc.).
  */
 export interface ErrorHandlerOptions {
   /** Logger 实例（可选，如果提供则使用，否则创建默认 logger） */
@@ -32,7 +33,7 @@ export interface ErrorHandlerOptions {
 }
 
 /**
- * 创建错误处理中间件
+ * Creates error handler middleware. Catches errors and formats responses.
  *
  * @param options 错误处理配置选项
  * @returns 错误处理中间件函数

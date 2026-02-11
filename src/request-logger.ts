@@ -1,7 +1,8 @@
 /**
- * 请求日志中间件
+ * @module @dreamer/middlewares/request-logger
  *
- * 记录请求信息、响应信息、错误信息
+ * Request logger middleware. Logs request, response, and error info. Exports
+ * requestLogger and RequestLoggerOptions.
  */
 
 import type { Logger, LogLevel } from "@dreamer/logger";
@@ -10,7 +11,7 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 请求日志配置选项
+ * Options for request logger (logger, level, format, skip, detailed, etc.).
  */
 export interface RequestLoggerOptions {
   /** Logger 实例（可选，如果提供则使用，否则创建默认 logger） */
@@ -30,7 +31,7 @@ export interface RequestLoggerOptions {
 }
 
 /**
- * 创建请求日志中间件
+ * Creates request logger middleware. Logs each request and response.
  *
  * @param options 请求日志配置选项
  * @returns 请求日志中间件函数

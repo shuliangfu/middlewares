@@ -1,18 +1,22 @@
 # @dreamer/middlewares
 
-> HTTP middleware library compatible with Deno and Bun. Provides 17 ready-to-use middlewares that integrate seamlessly with @dreamer/server or any HttpContext-compatible framework.
+> HTTP middleware library compatible with Deno and Bun. Provides 17 ready-to-use
+> middlewares that integrate seamlessly with @dreamer/server or any
+> HttpContext-compatible framework.
 
-English | [中文 (Chinese)](./README-zh.md)
+English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
-[![Tests](https://img.shields.io/badge/tests-192%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-209%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 ---
 
 ## 🎯 Features
 
-Provides 17 ready-to-use HTTP middlewares covering request parsing, CORS, security, rate limiting, logging, caching, static files, and more. Integrates seamlessly with @dreamer/server or any HttpContext-compatible framework.
+Provides 17 ready-to-use HTTP middlewares covering request parsing, CORS,
+security, rate limiting, logging, caching, static files, and more. Integrates
+seamlessly with @dreamer/server or any HttpContext-compatible framework.
 
 ---
 
@@ -34,13 +38,13 @@ bunx jsr add @dreamer/middlewares
 
 ## 🌍 Environment Compatibility
 
-| Environment | Version | Status |
-|-------------|---------|--------|
-| **Deno** | 2.6+ | ✅ Fully supported |
-| **Bun** | 1.3.5+ | ✅ Fully supported |
-| **Server** | - | ✅ Supported (works with Deno and Bun, requires @dreamer/server or compatible framework) |
-| **Client** | - | ❌ N/A (server-side HTTP middlewares only) |
-| **Dependencies** | - | 📦 @dreamer/server (types), @dreamer/middleware, @dreamer/logger, etc. |
+| Environment      | Version | Status                                                                                   |
+| ---------------- | ------- | ---------------------------------------------------------------------------------------- |
+| **Deno**         | 2.6+    | ✅ Fully supported                                                                       |
+| **Bun**          | 1.3.5+  | ✅ Fully supported                                                                       |
+| **Server**       | -       | ✅ Supported (works with Deno and Bun, requires @dreamer/server or compatible framework) |
+| **Client**       | -       | ❌ N/A (server-side HTTP middlewares only)                                               |
+| **Dependencies** | -       | 📦 @dreamer/server (types), @dreamer/middleware, @dreamer/logger, etc.                   |
 
 ---
 
@@ -74,10 +78,12 @@ bunx jsr add @dreamer/middlewares
 ## 🎯 Use Cases
 
 - Use with @dreamer/server or any HttpContext-compatible framework
-- Add CORS, CSRF, security headers, rate limiting, and request logging to HTTP apps
+- Add CORS, CSRF, security headers, rate limiting, and request logging to HTTP
+  apps
 - Parse request body, validate requests, verify signatures
 - Serve static files, response cache, compression, timeout, and health checks
-- Unified error response format and error logging (including ctx.state.requestId)
+- Unified error response format and error logging (including
+  ctx.state.requestId)
 
 ---
 
@@ -85,12 +91,19 @@ bunx jsr add @dreamer/middlewares
 
 ```typescript
 import { Server } from "@dreamer/server";
-import { requestId, requestLogger, cors, bodyParser } from "@dreamer/middlewares";
+import {
+  bodyParser,
+  cors,
+  requestId,
+  requestLogger,
+} from "@dreamer/middlewares";
 
 const server = new Server({ port: 3000 });
 
 server.use(requestId());
-server.use(requestLogger({ skip: (ctx) => ctx.path.startsWith("/.well-known/") }));
+server.use(
+  requestLogger({ skip: (ctx) => ctx.path.startsWith("/.well-known/") }),
+);
 server.use(cors({ origin: "*" }));
 server.use(bodyParser());
 
@@ -115,7 +128,11 @@ app.useError(errorHandler({ isDev: false }));
 ### Rate limiting and request signature
 
 ```typescript
-import { rateLimit, requestSignature, generateRequestSignature } from "@dreamer/middlewares";
+import {
+  generateRequestSignature,
+  rateLimit,
+  requestSignature,
+} from "@dreamer/middlewares";
 
 app.use(rateLimit({ max: 100, windowMs: 60000 }));
 app.use(requestSignature({
@@ -128,7 +145,7 @@ app.use(requestSignature({
 ### Static files and response cache
 
 ```typescript
-import { staticFiles, responseCache } from "@dreamer/middlewares";
+import { responseCache, staticFiles } from "@dreamer/middlewares";
 
 app.use(staticFiles({ root: "./public", prefix: "/static" }));
 app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
@@ -140,53 +157,69 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ### Built-in middlewares
 
-| Middleware | Export Name | Description |
-|------------|-------------|-------------|
-| Body Parser | `bodyParser` | Parse JSON/form/text/raw |
-| Compression | `compression` | gzip/brotli response compression |
-| CORS | `cors` | Cross-origin |
-| CSRF | `csrf` | CSRF protection |
-| Error Handler | `errorHandler` | Unified error handling (ErrorMiddleware) |
-| Health Check | `healthCheck` | Health check |
-| Metrics | `metrics` | Request metrics, getMetricsStats/resetMetrics |
-| Performance Analyzer | `performanceAnalyzer` | Performance analysis, clearPerformanceData/getPerformanceStats |
-| Rate Limit | `rateLimit` | Rate limiting |
-| Request ID | `requestId` | Request ID (writes to ctx.state) |
-| Request Logger | `requestLogger` | Request logging |
-| Request Signature | `requestSignature`, `generateRequestSignature` | Request signature verification and generation |
-| Request Validator | `requestValidator` | Request validation |
-| Response Cache | `responseCache` | Response cache, clearResponseCache/getResponseCacheStats |
-| Security Headers | `securityHeaders` | Security headers |
-| Static Files | `staticFiles` | Static files |
-| Timeout | `timeout` | Request timeout |
+| Middleware           | Export Name                                    | Description                                                    |
+| -------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
+| Body Parser          | `bodyParser`                                   | Parse JSON/form/text/raw                                       |
+| Compression          | `compression`                                  | gzip/brotli response compression                               |
+| CORS                 | `cors`                                         | Cross-origin                                                   |
+| CSRF                 | `csrf`                                         | CSRF protection                                                |
+| Error Handler        | `errorHandler`                                 | Unified error handling (ErrorMiddleware)                       |
+| Health Check         | `healthCheck`                                  | Health check                                                   |
+| Metrics              | `metrics`                                      | Request metrics, getMetricsStats/resetMetrics                  |
+| Performance Analyzer | `performanceAnalyzer`                          | Performance analysis, clearPerformanceData/getPerformanceStats |
+| Rate Limit           | `rateLimit`                                    | Rate limiting                                                  |
+| Request ID           | `requestId`                                    | Request ID (writes to ctx.state)                               |
+| Request Logger       | `requestLogger`                                | Request logging                                                |
+| Request Signature    | `requestSignature`, `generateRequestSignature` | Request signature verification and generation                  |
+| Request Validator    | `requestValidator`                             | Request validation                                             |
+| Response Cache       | `responseCache`                                | Response cache, clearResponseCache/getResponseCacheStats       |
+| Security Headers     | `securityHeaders`                              | Security headers                                               |
+| Static Files         | `staticFiles`                                  | Static files                                                   |
+| Timeout              | `timeout`                                      | Request timeout                                                |
 
 ### Type exports
 
-- `BodyParserOptions`, `CompressionOptions`, `CorsOptions`, `CsrfOptions`, `CsrfTokenGenerator`
-- `ErrorHandlerOptions`, `HealthCheckOptions`, `MetricsOptions`, `PerformanceAnalyzerOptions`
-- `RateLimitOptions`, `RequestIdOptions`, `RequestLoggerOptions`, `RequestSignatureOptions`, `HmacAlgorithm`
+- `BodyParserOptions`, `CompressionOptions`, `CorsOptions`, `CsrfOptions`,
+  `CsrfTokenGenerator`
+- `ErrorHandlerOptions`, `HealthCheckOptions`, `MetricsOptions`,
+  `PerformanceAnalyzerOptions`
+- `RateLimitOptions`, `RequestIdOptions`, `RequestLoggerOptions`,
+  `RequestSignatureOptions`, `HmacAlgorithm`
 - `RequestValidatorOptions`, `ValidationRule`, `ResponseCacheOptions`
-- `SecurityHeadersOptions`, `DynamicSecurityPolicy`, `StaticFilesOptions`, `TimeoutOptions`
+- `SecurityHeadersOptions`, `DynamicSecurityPolicy`, `StaticFilesOptions`,
+  `TimeoutOptions`
+
+---
+
+## 📝 Changelog
+
+- **v1.0.1** (2026-02-11): Added CI workflow; docs in `docs/en-US` and
+  `docs/zh-CN`; JSR module/symbol docs; test report 209 passed.
+  [Full changelog](./docs/en-US/CHANGELOG.md)
 
 ---
 
 ## 📊 Test Report
 
-- **Total tests**: 192
-- **Passed**: 192 ✅
+- **Total tests**: 209
+- **Passed**: 209 ✅
 - **Failed**: 0
 - **Pass rate**: 100%
-- **Test date**: 2026-02-03
-- **Details**: [TEST_REPORT.md](./TEST_REPORT.md)
+- **Test date**: 2026-02-11
+- **Details**: [TEST_REPORT.md](./docs/en-US/TEST_REPORT.md)
 
 ---
 
 ## 📝 Notes
 
-- This library provides middleware implementations only. It must be used with @dreamer/server or a framework compatible with `Middleware<HttpContext>`.
-- Request ID is stored in `ctx.state.requestId`; error handler and other middlewares read from there.
-- Static files, response cache, etc. use @dreamer/runtime-adapter for Deno/Bun compatibility.
-- Some middlewares (e.g. request-logger, error-handler) accept an optional `logger`; otherwise they use the default createLogger().
+- This library provides middleware implementations only. It must be used with
+  @dreamer/server or a framework compatible with `Middleware<HttpContext>`.
+- Request ID is stored in `ctx.state.requestId`; error handler and other
+  middlewares read from there.
+- Static files, response cache, etc. use @dreamer/runtime-adapter for Deno/Bun
+  compatibility.
+- Some middlewares (e.g. request-logger, error-handler) accept an optional
+  `logger`; otherwise they use the default createLogger().
 
 ---
 

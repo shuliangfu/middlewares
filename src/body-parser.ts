@@ -1,14 +1,15 @@
 /**
- * Body Parser 中间件
+ * @module @dreamer/middlewares/body-parser
  *
- * 解析请求体（JSON、表单、文本等）
+ * Body parser middleware. Parses request body (JSON, URL-encoded form, text, raw)
+ * and attaches to context. Exports bodyParser and BodyParserOptions.
  */
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Body Parser 配置选项
+ * Options for body parser (JSON, urlencoded, text, raw limits and options).
  */
 export interface BodyParserOptions {
   /** JSON 解析选项 */
