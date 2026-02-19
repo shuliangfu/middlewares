@@ -7,6 +7,7 @@
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * Supported HMAC algorithm names for request signing (HS256, HS384, HS512).
@@ -217,7 +218,7 @@ export function requestSignature(
     timestampTolerance = 60, // 1 分钟容差
     signFields = defaultSignFields,
     shouldSkip,
-    errorMessage = "Forbidden: Invalid request signature",
+    errorMessage,
   } = options;
 
   return async (ctx: HttpContext, next: () => Promise<void>): Promise<void> => {
@@ -236,7 +237,7 @@ export function requestSignature(
         JSON.stringify({
           error: {
             code: "MISSING_SIGNATURE",
-            message: "Request signature and timestamp are required",
+            message: $tr("middlewares.requestSignature.missingSignature"),
             status: 403,
           },
         }),
@@ -255,7 +256,7 @@ export function requestSignature(
         JSON.stringify({
           error: {
             code: "INVALID_TIMESTAMP",
-            message: "Invalid timestamp format",
+            message: $tr("middlewares.requestSignature.invalidTimestampFormat"),
             status: 403,
           },
         }),
@@ -276,9 +277,10 @@ export function requestSignature(
         JSON.stringify({
           error: {
             code: "SIGNATURE_EXPIRED",
-            message: `Request signature expired (age: ${age}s, max: ${
-              expiresIn + timestampTolerance
-            }s)`,
+            message: $tr("middlewares.requestSignature.signatureExpired", {
+              age: String(age),
+              max: String(expiresIn + timestampTolerance),
+            }),
             status: 403,
           },
         }),
@@ -296,7 +298,7 @@ export function requestSignature(
         JSON.stringify({
           error: {
             code: "INVALID_TIMESTAMP",
-            message: "Request timestamp is in the future",
+            message: $tr("middlewares.requestSignature.timestampInFuture"),
             status: 403,
           },
         }),
@@ -322,7 +324,8 @@ export function requestSignature(
         JSON.stringify({
           error: {
             code: "INVALID_SIGNATURE",
-            message: errorMessage,
+            message: errorMessage ??
+              $tr("middlewares.requestSignature.invalidSignature"),
             status: 403,
           },
         }),

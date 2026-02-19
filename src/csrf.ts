@@ -7,6 +7,7 @@
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * Function type that generates a CSRF token string (e.g. random bytes).
@@ -144,7 +145,7 @@ export function csrf(options: CsrfOptions = {}): Middleware<HttpContext> {
     tokenGenerator = () => generateRandomToken(32),
     shouldSkip = defaultShouldSkip,
     shouldVerify = defaultShouldVerify,
-    errorMessage = "Forbidden: CSRF token mismatch",
+    errorMessage,
   } = options;
 
   const {
@@ -188,7 +189,7 @@ export function csrf(options: CsrfOptions = {}): Middleware<HttpContext> {
           JSON.stringify({
             error: {
               code: "CSRF_TOKEN_MISMATCH",
-              message: errorMessage,
+              message: errorMessage ?? $tr("middlewares.csrf.tokenMismatch"),
               status: 403,
             },
           }),

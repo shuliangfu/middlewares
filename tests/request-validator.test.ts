@@ -2,11 +2,16 @@
  * 请求验证中间件测试
  */
 
-import { describe, expect, it } from "@dreamer/test";
+import { beforeEach, describe, expect, it } from "@dreamer/test";
+import { setMiddlewaresLocale } from "../src/i18n.ts";
 import { requestValidator } from "../src/request-validator.ts";
 import { createTestContext } from "./helpers.ts";
 
 describe("Request Validator 中间件", () => {
+  beforeEach(() => {
+    setMiddlewaresLocale("en-US");
+  });
+
   describe("基础功能", () => {
     it("应该创建请求验证中间件", () => {
       const middleware = requestValidator();

@@ -2,11 +2,16 @@
  * CSRF 保护中间件测试
  */
 
-import { afterEach, describe, expect, it } from "@dreamer/test";
+import { afterEach, beforeEach, describe, expect, it } from "@dreamer/test";
 import { csrf } from "../src/csrf.ts";
+import { setMiddlewaresLocale } from "../src/i18n.ts";
 import { createTestContext } from "./helpers.ts";
 
 describe("CSRF 保护中间件", () => {
+  beforeEach(() => {
+    setMiddlewaresLocale("en-US");
+  });
+
   afterEach(() => {
     // 清理测试
   });

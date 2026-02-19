@@ -15,6 +15,7 @@ import {
 } from "@dreamer/runtime-adapter";
 import type { HttpContext } from "@dreamer/server";
 import { FileCache } from "./file-cache.ts";
+import { $tr } from "./i18n.ts";
 
 /**
  * Options for static files middleware (root, prefix, index, cache, maxAge, etc.).
@@ -114,7 +115,9 @@ export function staticFiles(
     // 检查点文件
     if (basename(filePath).startsWith(".")) {
       if (dotfiles === "deny") {
-        ctx.response = new Response("Forbidden", { status: 403 });
+        ctx.response = new Response($tr("middlewares.staticFiles.forbidden"), {
+          status: 403,
+        });
         return;
       }
       if (dotfiles === "ignore") {

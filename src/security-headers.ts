@@ -7,6 +7,7 @@
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * Function that returns security header config per request (e.g. CSP) from HttpContext.
@@ -81,9 +82,7 @@ function validateSecurityHeadersConfig(
     // 基本验证：检查是否包含必要的指令
     const csp = options.contentSecurityPolicy.toLowerCase();
     if (!csp.includes("default-src") && !csp.includes("script-src")) {
-      console.warn(
-        "[安全头警告] Content-Security-Policy 建议包含 default-src 或 script-src 指令",
-      );
+      console.warn($tr("middlewares.securityHeaders.cspRecommendation"));
     }
   }
 
@@ -92,9 +91,7 @@ function validateSecurityHeadersConfig(
     options.crossOriginEmbedderPolicy &&
     options.crossOriginOpenerPolicy !== "same-origin"
   ) {
-    console.warn(
-      "[安全头警告] Cross-Origin-Embedder-Policy 建议与 Cross-Origin-Opener-Policy: same-origin 一起使用",
-    );
+    console.warn($tr("middlewares.securityHeaders.coepCoopRecommendation"));
   }
 }
 

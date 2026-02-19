@@ -1,0 +1,40 @@
+{
+  "middlewares": {
+    "requestSignature": {
+      "missingSignature": "Request signature and timestamp are required",
+      "invalidTimestampFormat": "Invalid timestamp format",
+      "signatureExpired": "Request signature expired (age: {age}s, max: {max}s)",
+      "timestampInFuture": "Request timestamp is in the future",
+      "invalidSignature": "Forbidden: Invalid request signature"
+    },
+    "compression": {
+      "brotliNotSupported": "Brotli compression not supported in this runtime: {detail}",
+      "compressFailed": "[Compression] Compression failed: {error}"
+    },
+    "securityHeaders": {
+      "cspRecommendation": "[Security headers] Content-Security-Policy should include default-src or script-src directive",
+      "coepCoopRecommendation": "[Security headers] Cross-Origin-Embedder-Policy is recommended to be used with Cross-Origin-Opener-Policy: same-origin"
+    },
+    "requestValidator": {
+      "urlTooLong": "URL too long (max: {max} characters)",
+      "tooManyQueryParams": "Too many query parameters (max: {max})",
+      "headersTooLarge": "Request headers too large (max: {max} bytes)",
+      "bodyTooLarge": "Request body too large (max: {max} bytes)",
+      "validationFailed": "Validation failed",
+      "thisFieldRequired": "This field is required"
+    },
+    "csrf": {
+      "tokenMismatch": "Forbidden: CSRF token mismatch"
+    },
+    "errorHandler": {
+      "internalServerError": "Internal Server Error"
+    },
+    "performanceAnalyzer": {
+      "slowMiddleware": "[Performance] Middleware \"{name}\" slow: {duration}ms (path: {path})",
+      "slowRequest": "[Performance] Slow request: {method} {path} - {duration}ms (status: {status})"
+    },
+    "staticFiles": {
+      "forbidden": "Forbidden"
+    }
+  }
+}

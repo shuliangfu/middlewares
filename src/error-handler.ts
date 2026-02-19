@@ -9,6 +9,7 @@ import type { Logger } from "@dreamer/logger";
 import { createLogger } from "@dreamer/logger";
 import type { ErrorMiddleware } from "@dreamer/middleware";
 import type { HttpContext, HttpError } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * Options for error handler (logger, isDev, includeDetails, formatError, etc.).
@@ -184,7 +185,8 @@ function defaultFormatError(
 
   return {
     status,
-    message: error.message || "Internal Server Error",
+    message: error.message ||
+      $tr("middlewares.errorHandler.internalServerError"),
     code,
     timestamp: new Date().toISOString(),
     details: includeDetails && Object.keys(details).length > 0

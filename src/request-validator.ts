@@ -7,6 +7,7 @@
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * Single validation rule: field name, validate function, optional message and required flag.
@@ -75,12 +76,16 @@ function validateRequestSize(
 
   // 验证 URL 长度
   if (ctx.url.toString().length > maxUrlLength) {
-    return `URL too long (max: ${maxUrlLength} characters)`;
+    return $tr("middlewares.requestValidator.urlTooLong", {
+      max: String(maxUrlLength),
+    });
   }
 
   // 验证查询参数数量
   if (ctx.query && Object.keys(ctx.query).length > maxQueryParams) {
-    return `Too many query parameters (max: ${maxQueryParams})`;
+    return $tr("middlewares.requestValidator.tooManyQueryParams", {
+      max: String(maxQueryParams),
+    });
   }
 
   // 验证请求头大小
@@ -89,7 +94,9 @@ function validateRequestSize(
     headerSize += key.length + value.length + 4; // 4 for ": " and "\r\n"
   }
   if (headerSize > maxHeaderSize) {
-    return `Request headers too large (max: ${maxHeaderSize} bytes)`;
+    return $tr("middlewares.requestValidator.headersTooLarge", {
+      max: String(maxHeaderSize),
+    });
   }
 
   // 验证请求体大小（如果 body 是字符串或 Uint8Array）
@@ -97,11 +104,15 @@ function validateRequestSize(
     if (typeof ctx.body === "string") {
       const bodySize = new TextEncoder().encode(ctx.body).length;
       if (bodySize > maxBodySize) {
-        return `Request body too large (max: ${maxBodySize} bytes)`;
+        return $tr("middlewares.requestValidator.bodyTooLarge", {
+          max: String(maxBodySize),
+        });
       }
     } else if (ctx.body instanceof Uint8Array) {
       if (ctx.body.length > maxBodySize) {
-        return `Request body too large (max: ${maxBodySize} bytes)`;
+        return $tr("middlewares.requestValidator.bodyTooLarge", {
+          max: String(maxBodySize),
+        });
       }
     } else if (typeof ctx.body === "object") {
       // 对于对象，估算 JSON 序列化后的大小
@@ -109,7 +120,9 @@ function validateRequestSize(
         const jsonString = JSON.stringify(ctx.body);
         const bodySize = new TextEncoder().encode(jsonString).length;
         if (bodySize > maxBodySize) {
-          return `Request body too large (max: ${maxBodySize} bytes)`;
+          return $tr("middlewares.requestValidator.bodyTooLarge", {
+            max: String(maxBodySize),
+          });
         }
       } catch {
         // 如果序列化失败，跳过大小检查
@@ -149,7 +162,7 @@ function validateRules(
     if (isRequired && (value === undefined || value === null || value === "")) {
       return formatError(
         rule.field,
-        rule.message || "This field is required",
+        rule.message || $tr("middlewares.requestValidator.thisFieldRequired"),
       );
     }
 
@@ -159,7 +172,7 @@ function validateRules(
       if (result === false) {
         return formatError(
           rule.field,
-          rule.message || "Validation failed",
+          rule.message || $tr("middlewares.requestValidator.validationFailed"),
         );
       } else if (typeof result === "string") {
         return formatError(rule.field, result);
@@ -256,7 +269,7 @@ export function requestValidator(
           JSON.stringify({
             error: {
               code: "VALIDATION_ERROR",
-              message: "Validation failed",
+              message: $tr("middlewares.requestValidator.validationFailed"),
               status: 400,
             },
           }),
