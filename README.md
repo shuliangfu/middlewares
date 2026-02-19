@@ -7,7 +7,7 @@
 English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-209%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 ---
@@ -193,8 +193,8 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ## 📝 Changelog
 
-- **v1.0.1** (2026-02-11): Added CI workflow; docs in `docs/en-US` and
-  `docs/zh-CN`; JSR module/symbol docs; test report 209 passed.
+- **v1.0.2** (2026-02-19): Added i18n (en-US / zh-CN) for middleware messages;
+  `detectLocale`, `setMiddlewaresLocale`, `Locale` exported.
   [Full changelog](./docs/en-US/CHANGELOG.md)
 
 ---
@@ -231,7 +231,7 @@ Issues and Pull Requests are welcome.
 
 ## 📄 License
 
-MIT License - see [LICENSE.md](./LICENSE.md)
+Apache License 2.0 - see [LICENSE](./LICENSE)
 
 ---
 

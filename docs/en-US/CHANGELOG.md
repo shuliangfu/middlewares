@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.2] - 2026-02-19
+
+### Added
+
+- **Internationalization (i18n)**:
+  - `src/i18n.ts`: `detectLocale()`, `setMiddlewaresLocale()`, `$tr()`; locale
+    from `LANGUAGE` / `LC_ALL` / `LANG`.
+  - `src/locales/en-US.json` and `src/locales/zh-CN.json` for all user-facing
+    messages.
+  - Request signature, compression, security-headers, request-validator, csrf,
+    error-handler, performance-analyzer, and static-files middleware now use
+    `$tr()` for error and log messages.
+  - Exported `detectLocale`, `setMiddlewaresLocale`, and `Locale` from the main
+    entry.
+
+---
+
 ## [1.0.1] - 2026-02-11
 
 ### Added

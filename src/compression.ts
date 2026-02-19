@@ -9,6 +9,7 @@ import { compress as brotliCompress } from "brotli";
 import { gzip } from "pako";
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * Options for response compression (level, threshold, filter, enableBrotli).
@@ -106,10 +107,9 @@ async function compressBrotli(data: Uint8Array): Promise<Uint8Array> {
     return result instanceof Uint8Array ? result : new Uint8Array(result);
   } catch (error) {
     // 如果 brotli 包不可用，抛出错误
+    const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Brotli compression not supported in this runtime: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      $tr("middlewares.compression.brotliNotSupported", { detail }),
     );
   }
 }
@@ -237,7 +237,10 @@ export function compression(
       });
     } catch (error) {
       // 压缩失败，使用原始响应
-      console.error("[Compression] 压缩失败:", error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      console.error(
+        $tr("middlewares.compression.compressFailed", { error: errMsg }),
+      );
     }
   };
 }

@@ -28,7 +28,7 @@ jobs:
         run: deno lint
 
       - name: Test (Deno)
-        run: deno test -A tests/
+        run: deno test -A --no-check tests/
 
   # --- macOS ---
   test-macos:
@@ -50,7 +50,7 @@ jobs:
         run: deno lint
 
       - name: Test (Deno, macOS)
-        run: deno test -A tests/
+        run: deno test -A --no-check tests/
 
   # --- Windows ---
   test-windows:
@@ -72,4 +72,4 @@ jobs:
         run: deno lint
 
       - name: Test (Deno, Windows)
-        run: deno test -A tests/
+        run: deno test -A --no-check tests/

@@ -53,3 +53,4 @@ export {
 } from "./security-headers.ts";
 export { staticFiles, type StaticFilesOptions } from "./static-files.ts";
 export { timeout, type TimeoutOptions } from "./timeout.ts";
+export { detectLocale, type Locale, setMiddlewaresLocale } from "./i18n.ts";

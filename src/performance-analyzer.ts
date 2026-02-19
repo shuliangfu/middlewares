@@ -8,6 +8,7 @@
 
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
+import { $tr } from "./i18n.ts";
 
 /**
  * 中间件执行记录
@@ -341,9 +342,11 @@ export function performanceAnalyzer(
         // 如果中间件执行慢，记录警告
         if (duration > slowMiddlewareThreshold && logSlowRequests) {
           console.warn(
-            `[性能警告] 中间件 "${middlewareName}" 执行缓慢: ${
-              duration.toFixed(2)
-            }ms (路径: ${ctx.path})`,
+            $tr("middlewares.performanceAnalyzer.slowMiddleware", {
+              name: middlewareName,
+              duration: duration.toFixed(2),
+              path: ctx.path,
+            }),
           );
         }
       }
@@ -369,9 +372,12 @@ export function performanceAnalyzer(
 
         if (logSlowRequests) {
           console.warn(
-            `[性能警告] 慢请求: ${ctx.method} ${ctx.path} - ${
-              duration.toFixed(2)
-            }ms (状态码: ${record.status})`,
+            $tr("middlewares.performanceAnalyzer.slowRequest", {
+              method: ctx.method,
+              path: ctx.path,
+              duration: duration.toFixed(2),
+              status: String(record.status ?? ""),
+            }),
           );
         }
       }

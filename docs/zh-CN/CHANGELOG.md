@@ -7,6 +7,21 @@
 
 ---
 
+## [1.0.2] - 2026-02-19
+
+### 新增
+
+- **国际化（i18n）**：
+  - `src/i18n.ts`：`detectLocale()`、`setMiddlewaresLocale()`、`$tr()`；语言由
+    `LANGUAGE` / `LC_ALL` / `LANG` 检测。
+  - `src/locales/en-US.json` 与 `src/locales/zh-CN.json`
+    提供全部面向用户的文案。
+  - 请求签名、压缩、安全头、请求校验、CSRF、错误处理、性能分析、静态文件等中间件的错误与日志文案均改为使用
+    `$tr()`。
+  - 主入口导出 `detectLocale`、`setMiddlewaresLocale`、`Locale`。
+
+---
+
 ## [1.0.1] - 2026-02-11
 
 ### 新增
