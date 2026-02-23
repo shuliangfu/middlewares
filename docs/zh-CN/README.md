@@ -186,8 +186,9 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ## 📝 变更日志
 
-- **v1.0.2**（2026-02-19）：新增 i18n（en-US / zh-CN）中间件文案； 导出
-  `detectLocale`、`setMiddlewaresLocale`、`Locale`。[完整变更](./CHANGELOG.md)
+- **v1.0.3**（2026-02-23）：新增 CI Bun 测试（Linux/macOS/Windows）；Brotli
+  延迟加载修复 Bun 兼容；补充各中间件与 FileCache/ResponseCache 的
+  JSDoc。[完整变更](./CHANGELOG.md)
 
 ---
 
