@@ -9,47 +9,50 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * 缓存项
+ * 单条响应缓存项，包含响应体、状态码、头及时间戳。
  */
 interface CacheItem {
-  /** 响应体 */
+  /** 响应体二进制内容 */
   body: Uint8Array;
-  /** 响应状态码 */
+  /** HTTP 状态码 */
   status: number;
-  /** 响应头 */
+  /** 响应头（含 Cache-Control、ETag、Last-Modified 等） */
   headers: Headers;
-  /** ETag 值 */
+  /** 可选 ETag，用于条件请求 304 */
   etag?: string;
-  /** Last-Modified 时间 */
+  /** 可选 Last-Modified，用于条件请求 304 */
   lastModified?: Date;
-  /** 缓存时间戳 */
+  /** 写入缓存时的时间戳，用于 TTL 判断 */
   timestamp: number;
-  /** 访问时间戳（用于 LRU） */
+  /** 最近一次访问时间戳，用于 LRU 淘汰 */
   accessTime: number;
 }
 
 /**
- * LRU 响应缓存
+ * LRU 响应缓存类。
+ *
+ * 按 key 缓存 HTTP 响应（body + status + headers），支持最大容量与可选 TTL。
+ * 供 responseCache 中间件内部使用，按配置创建单例。
  */
 class ResponseCache {
-  /** 缓存存储 */
+  /** 键到缓存项的映射 */
   private cache: Map<string, CacheItem>;
-  /** 最大缓存大小（字节） */
+  /** 允许的最大缓存总大小（字节） */
   private maxSize: number;
-  /** 当前缓存大小（字节） */
+  /** 当前已缓存响应总大小（字节） */
   private currentSize: number;
-  /** TTL（毫秒，0 表示不过期） */
+  /** 生存时间（毫秒），0 表示不按时间过期 */
   private ttl: number;
 
   /**
-   * 创建响应缓存实例
+   * 创建响应缓存实例。
    *
-   * @param options 缓存配置选项
+   * @param options - 缓存配置；未传则使用默认 maxSize 100MB、ttl 0
    */
   constructor(options: {
-    /** 最大缓存大小（字节，默认：100MB） */
+    /** 最大缓存总大小（字节），默认 100MB */
     maxSize?: number;
-    /** TTL（毫秒，默认：0 表示不过期） */
+    /** 生存时间（毫秒），0 表示不过期，默认 0 */
     ttl?: number;
   } = {}) {
     this.cache = new Map();
@@ -59,10 +62,12 @@ class ResponseCache {
   }
 
   /**
-   * 获取缓存项
+   * 根据键获取缓存项。
    *
-   * @param key 缓存键
-   * @returns 缓存项，如果不存在或已过期则返回 null
+   * 若存在且未过期会更新 accessTime；若已过期则删除该键并返回 null。
+   *
+   * @param key - 缓存键（由 keyGenerator 生成）
+   * @returns 缓存项，不存在或已过期时返回 null
    */
   get(key: string): CacheItem | null {
     const item = this.cache.get(key);
@@ -85,10 +90,12 @@ class ResponseCache {
   }
 
   /**
-   * 设置缓存项
+   * 写入或覆盖一条响应缓存项。
    *
-   * @param key 缓存键
-   * @param item 缓存项
+   * 若单条响应超过 maxSize 则不缓存；若当前容量不足会先按 LRU 淘汰再写入。
+   *
+   * @param key - 缓存键
+   * @param item - 缓存项（不含 timestamp、accessTime，由本方法填充）
    */
   set(key: string, item: Omit<CacheItem, "timestamp" | "accessTime">): void {
     const bodySize = item.body.length;
@@ -127,9 +134,9 @@ class ResponseCache {
   }
 
   /**
-   * 删除缓存项
+   * 删除指定键的缓存项并释放其占用的容量。
    *
-   * @param key 缓存键
+   * @param key - 要删除的缓存键；若不存在则无效果
    */
   delete(key: string): void {
     const item = this.cache.get(key);
@@ -140,7 +147,7 @@ class ResponseCache {
   }
 
   /**
-   * 清空所有缓存
+   * 清空所有缓存项并将当前容量置零。
    */
   clear(): void {
     this.cache.clear();
@@ -148,13 +155,15 @@ class ResponseCache {
   }
 
   /**
-   * 获取缓存统计信息
+   * 返回当前缓存的统计信息。
+   *
+   * @returns 包含 size（当前占用字节）、count（条数）、maxSize（容量上限）、usage（使用率 0–1）的对象
    */
   getStats(): {
     size: number;
     count: number;
     maxSize: number;
-    usage: number; // 使用率（0-1）
+    usage: number;
   } {
     return {
       size: this.currentSize,
@@ -165,7 +174,9 @@ class ResponseCache {
   }
 
   /**
-   * 删除最久未使用的项（LRU）
+   * 按访问时间淘汰一条最久未使用的缓存项（LRU）。
+   *
+   * 在 set 时容量不足时调用以腾出空间；内部使用。
    */
   private evictLRU(): void {
     let oldestKey: string | null = null;
@@ -185,34 +196,36 @@ class ResponseCache {
 }
 
 /**
- * Options for response cache (cacheControl, maxAge, keyGenerator, shouldCache, etc.).
+ * 响应缓存中间件的配置选项。
+ *
+ * 用于配置 Cache-Control、maxAge、ETag/Last-Modified、容量、TTL 及键生成与缓存条件。
  */
 export interface ResponseCacheOptions {
-  /** 缓存策略（public、private、no-cache，默认：public） */
+  /** Cache-Control 策略：public / private / no-cache，默认 "public" */
   cacheControl?: "public" | "private" | "no-cache";
-  /** 缓存时间（秒，默认：3600） */
+  /** 缓存时长（秒），会写入 max-age，默认 3600 */
   maxAge?: number;
-  /** 是否启用 ETag（默认：true） */
+  /** 是否生成并校验 ETag，默认 true */
   etag?: boolean;
-  /** 是否启用 Last-Modified（默认：true） */
+  /** 是否使用 Last-Modified，默认 true */
   lastModified?: boolean;
-  /** 最大缓存大小（字节，默认：100MB） */
+  /** 内存缓存最大容量（字节），默认 100MB */
   maxSize?: number;
-  /** 缓存 TTL（毫秒，0 表示不过期，默认：0） */
+  /** 缓存 TTL（毫秒），0 表示不按时间过期，默认 0 */
   ttl?: number;
-  /** 生成缓存键的函数（默认：基于 URL、查询参数、请求头） */
+  /** 根据请求上下文生成缓存键；未提供则使用默认（method+path+query+部分头） */
   keyGenerator?: (ctx: HttpContext) => string;
-  /** 判断是否应该缓存响应的函数（默认：缓存 2xx 响应） */
+  /** 判断该响应是否应被缓存；未提供则仅缓存 2xx */
   shouldCache?: (ctx: HttpContext, response: Response) => boolean;
-  /** 判断是否应该跳过缓存的函数（默认：跳过 POST、PUT、DELETE、PATCH） */
+  /** 判断该请求是否跳过缓存（不读不写）；未提供则跳过非 GET/HEAD */
   shouldSkip?: (ctx: HttpContext) => boolean;
 }
 
 /**
- * 生成 ETag
+ * 根据响应体生成简单 ETag 字符串。
  *
- * @param data 数据
- * @returns ETag 值
+ * @param data - 响应体二进制数据
+ * @returns 带引号的 ETag 字符串，如 "a1b2c3"
  */
 function generateETag(data: Uint8Array): string {
   // 简单的哈希算法（实际可以使用更复杂的算法）
@@ -225,10 +238,10 @@ function generateETag(data: Uint8Array): string {
 }
 
 /**
- * 默认缓存键生成函数
+ * 默认缓存键生成函数：method + path + 排序后的 query + 部分请求头。
  *
- * @param ctx HTTP 上下文
- * @returns 缓存键
+ * @param ctx - 当前请求上下文
+ * @returns 唯一标识该请求的缓存键字符串
  */
 function defaultKeyGenerator(ctx: HttpContext): string {
   const parts: string[] = [
@@ -262,11 +275,11 @@ function defaultKeyGenerator(ctx: HttpContext): string {
 }
 
 /**
- * 默认判断是否应该缓存响应
+ * 默认缓存条件：仅缓存 2xx 响应。
  *
- * @param _ctx HTTP 上下文
- * @param response 响应对象
- * @returns 是否应该缓存
+ * @param _ctx - 请求上下文（未使用）
+ * @param response - 下游返回的响应
+ * @returns 为 true 时将该响应写入缓存
  */
 function defaultShouldCache(_ctx: HttpContext, response: Response): boolean {
   // 只缓存成功的响应（2xx）
@@ -274,10 +287,10 @@ function defaultShouldCache(_ctx: HttpContext, response: Response): boolean {
 }
 
 /**
- * 默认判断是否应该跳过缓存
+ * 默认跳过条件：非 GET/HEAD 请求不参与缓存读写。
  *
- * @param ctx HTTP 上下文
- * @returns 是否应该跳过
+ * @param ctx - 请求上下文
+ * @returns 为 true 时不查缓存、不写缓存
  */
 function defaultShouldSkip(ctx: HttpContext): boolean {
   // 跳过非 GET/HEAD 请求
@@ -288,17 +301,17 @@ function defaultShouldSkip(ctx: HttpContext): boolean {
 const cacheInstances = new Map<string, ResponseCache>();
 
 /**
- * Creates response cache middleware. Caches HTTP responses by key for faster repeat requests.
+ * 创建响应缓存中间件。
  *
- * @param options 响应缓存配置选项
- * @returns 响应缓存中间件函数
+ * 按 keyGenerator 生成的键缓存 GET/HEAD 的响应；命中时直接返回缓存或 304，
+ * 未命中时执行下游并依 shouldCache 决定是否写入缓存。支持 ETag、Last-Modified 条件请求。
+ *
+ * @param options - 响应缓存配置；未传则使用默认 keyGenerator、shouldCache、shouldSkip 等
+ * @returns 符合 {@link Middleware} 的响应缓存中间件
  *
  * @example
  * ```typescript
- * app.use(responseCache({
- *   maxAge: 3600,
- *   cacheControl: "public",
- * }));
+ * app.use(responseCache({ maxAge: 3600, cacheControl: "public" }));
  * ```
  */
 export function responseCache(
@@ -447,10 +460,12 @@ export function responseCache(
 }
 
 /**
- * Returns stats for the response cache instance matching the given options (size, count, usage).
+ * 获取与给定配置对应的响应缓存实例的统计信息。
  *
- * @param options Cache options used to identify the cache instance.
- * @returns Cache statistics object (size, count, maxSize, usage).
+ * 通过 options 中的 maxSize、ttl 匹配创建时的配置，返回该实例的 size、count、maxSize、usage。
+ *
+ * @param options - 与创建 responseCache 时相同的配置子集（至少 maxSize、ttl 用于匹配）
+ * @returns 统计对象；若未找到对应实例则返回全 0
  */
 export function getResponseCacheStats(
   options: ResponseCacheOptions = {},
@@ -477,9 +492,11 @@ export function getResponseCacheStats(
 }
 
 /**
- * Clears response cache: for the instance matching options, or all instances if options omitted.
+ * 清空响应缓存。
  *
- * @param options Optional cache options to clear one instance; omit to clear all.
+ * 传入与创建时相同的 options 则只清空该配置对应的实例；不传则清空所有 responseCache 实例。
+ *
+ * @param options - 可选；若传入则仅清空匹配该配置的缓存实例，否则清空全部
  */
 export function clearResponseCache(
   options?: ResponseCacheOptions,

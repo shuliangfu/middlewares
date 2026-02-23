@@ -1,6 +1,6 @@
 {
   "name": "@dreamer/middlewares",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "Apache-2.0",
   "description": "兼容 Deno 和 Bun 的 HTTP 中间件库，可与 @dreamer/server 或 HttpContext 兼容框架无缝集成",
   "exports": {

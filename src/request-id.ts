@@ -9,34 +9,33 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Options for request ID middleware (header name, generator, readFromHeader, etc.).
+ * Request ID 中间件的配置选项。
+ *
+ * 用于配置请求头名称、ID 生成方式、是否回写响应头及是否从请求头读取已有 ID。
  */
 export interface RequestIdOptions {
-  /** 请求头名称（默认：X-Request-ID） */
+  /** 请求/响应头名称，默认 "X-Request-ID" */
   headerName?: string;
-  /** 是否在响应头中包含 Request ID（默认：true） */
+  /** 是否在响应头中回写 Request ID，默认 true */
   includeInResponse?: boolean;
-  /** 自定义 ID 生成函数（默认：使用 crypto.randomUUID()） */
+  /** 自定义 ID 生成函数；未提供则使用 crypto.randomUUID() */
   generateId?: () => string;
-  /** 是否从请求头中读取 Request ID（如果存在）（默认：true） */
+  /** 是否优先从请求头读取已有 ID（用于链路追踪串联），默认 true */
   readFromHeader?: boolean;
 }
 
 /**
- * Creates request ID middleware. Assigns or reads a unique ID per request.
+ * 创建 Request ID 中间件。
  *
- * @param options 配置选项
- * @returns Request ID 中间件函数
+ * 为每个请求分配或读取唯一 ID，写入 ctx.state.requestId，并可选择回写响应头。
+ *
+ * @param options - 配置选项；未传则使用默认头名与 UUID 生成
+ * @returns 符合 {@link Middleware} 的 Request ID 中间件
  *
  * @example
  * ```typescript
  * app.use(requestId());
- *
- * // 自定义配置
- * app.use(requestId({
- *   headerName: "X-Correlation-ID",
- *   includeInResponse: true,
- * }));
+ * app.use(requestId({ headerName: "X-Correlation-ID", includeInResponse: true }));
  * ```
  */
 export function requestId(

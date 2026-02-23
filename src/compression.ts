@@ -3,25 +3,41 @@
  *
  * Response compression middleware. Compresses HTTP response body with gzip and
  * optional Brotli. Exports compression and CompressionOptions.
+ *
+ * Brotli 使用动态 import 延迟加载，避免在 CI（Bun/Linux/Mac）下因顶层加载
+ * brotli 的 Emscripten 代码导致 "(void 0) is not a function" 并拖垮构建/服务启动。
  */
 
-import { compress as brotliCompress } from "brotli";
 import { gzip } from "pako";
 import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 import { $tr } from "./i18n.ts";
 
 /**
- * Options for response compression (level, threshold, filter, enableBrotli).
+ * 响应压缩中间件的配置选项。
+ *
+ * 用于控制 gzip/br 压缩级别、最小压缩体积、可压缩的 Content-Type 以及是否启用 Brotli。
  */
 export interface CompressionOptions {
-  /** 压缩级别（1-9，默认：6，仅适用于 gzip） */
+  /**
+   * gzip 压缩级别，1–9，数值越大压缩率越高、耗时越长。
+   * 仅对 gzip 生效，默认 6。
+   */
   level?: number;
-  /** 最小响应大小（字节），小于此大小不压缩（默认：1024） */
+  /**
+   * 最小响应体大小（字节），小于此值不压缩，避免小响应被压缩后反而变大。
+   * 默认 1024（1KB）。
+   */
   threshold?: number;
-  /** 要压缩的 Content-Type（默认：所有文本类型） */
+  /**
+   * 根据 Content-Type 决定是否压缩；返回 true 表示可压缩。
+   * 未提供时使用默认过滤器（压缩 text/*、application/json、application/javascript 等）。
+   */
   filter?: (contentType: string) => boolean;
-  /** 是否启用 brotli 压缩（需要运行时支持，默认：false） */
+  /**
+   * 是否启用 Brotli（br）压缩；需运行时支持或 brotli 包可用。
+   * 默认 false，仅使用 gzip。
+   */
   enableBrotli?: boolean;
 }
 
@@ -100,8 +116,9 @@ async function compressBrotli(data: Uint8Array): Promise<Uint8Array> {
     }
   }
 
-  // 使用 brotli 包进行压缩（跨运行时兼容）
+  // 使用 brotli 包进行压缩（跨运行时兼容）；延迟加载避免 CI Bun 下顶层加载报错
   try {
+    const { compress: brotliCompress } = await import("brotli");
     const result = brotliCompress(data);
     // brotli 包返回的是 Buffer 或 Uint8Array
     return result instanceof Uint8Array ? result : new Uint8Array(result);
@@ -115,23 +132,24 @@ async function compressBrotli(data: Uint8Array): Promise<Uint8Array> {
 }
 
 /**
- * 创建响应压缩中间件
+ * 创建响应压缩中间件。
  *
- * @param options 压缩配置选项
- * @returns 压缩中间件函数
+ * 根据请求头 Accept-Encoding 对响应体进行 gzip 或（可选）Brotli 压缩，
+ * 仅压缩满足 threshold 与 filter 的响应，并设置 Content-Encoding、Vary 等头。
+ *
+ * @param options - 压缩配置；未传则使用默认（level=6, threshold=1024, enableBrotli=false）
+ * @returns 符合 {@link Middleware} 的压缩中间件函数
  *
  * @example
  * ```typescript
- * import { compression } from "@dreamer/server";
+ * import { compression } from "@dreamer/middlewares";
  *
- * // 使用默认配置
  * app.use(compression());
  *
- * // 自定义配置
  * app.use(compression({
- *   level: 9, // 最高压缩级别
- *   threshold: 2048, // 只压缩大于 2KB 的响应
- *   enableBrotli: true, // 启用 brotli 压缩
+ *   level: 9,
+ *   threshold: 2048,
+ *   enableBrotli: true,
  * }));
  * ```
  */

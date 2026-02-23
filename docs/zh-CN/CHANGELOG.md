@@ -7,6 +7,29 @@
 
 ---
 
+## [1.0.3] - 2026-02-23
+
+### 新增
+
+- **CI**：增加 Bun 测试
+  job（`test-linux-bun`、`test-macos-bun`、`test-windows-bun`）， 在
+  Linux、macOS、Windows 上执行 `bun install` 与 `bun test tests/`，验证与 Bun
+  的兼容性。
+
+### 变更
+
+- **压缩中间件**：Brotli 改为仅在调用 `compressBrotli()` 时通过动态
+  `import("brotli")` 加载 （即使用压缩中间件且开启 `enableBrotli` 且请求需要 br
+  时）。避免在模块加载时执行 Brotli 的 Emscripten 代码，修复 CI 在
+  Bun（Linux/macOS/Windows）上因导入 `@dreamer/middlewares` 而触发的 "(void 0)
+  is not a function" 报错。
+- **JSDoc**：为各中间件选项与工厂函数补充说明（compression、body-parser、cors、
+  error-handler、request-id、request-logger、health-check、static-files、timeout、
+  csrf、response-cache）；为 `FileCache`、`ResponseCache` 及内部 `CacheItem`
+  增加类与 方法级 JSDoc；主入口模块文档增加 `@see` 链接。
+
+---
+
 ## [1.0.2] - 2026-02-19
 
 ### 新增
