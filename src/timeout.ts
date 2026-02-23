@@ -9,38 +9,33 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Options for request timeout (timeout ms, message, statusCode, skip).
+ * 请求超时中间件的配置选项。
+ *
+ * 用于配置超时时间、超时响应文案与状态码，以及可选的跳过条件。
  */
 export interface TimeoutOptions {
-  /** 超时时间（毫秒，默认：30000，即 30 秒） */
+  /** 超时时间（毫秒），默认 30000（30 秒） */
   timeout?: number;
-  /** 超时时的响应消息（默认：Request Timeout） */
+  /** 超时时的响应体消息，默认 "Request Timeout" */
   message?: string;
-  /** 超时时的状态码（默认：408） */
+  /** 超时时的 HTTP 状态码，默认 408 */
   statusCode?: number;
-  /** 自定义跳过函数（默认：不跳过） */
+  /** 返回 true 时跳过超时检查（如健康检查路径） */
   skip?: (ctx: HttpContext) => boolean;
 }
 
 /**
- * Creates request timeout middleware. Aborts requests after a given duration.
+ * 创建请求超时中间件。
  *
- * @param options 超时配置选项
- * @returns 超时中间件函数
+ * 在指定时间内未完成响应的请求将被中止并返回可配置的状态码与消息。
+ *
+ * @param options - 超时配置；未传则 30 秒超时、408、Request Timeout
+ * @returns 符合 {@link Middleware} 的超时中间件
  *
  * @example
  * ```typescript
- * import { timeout } from "@dreamer/server";
- *
- * // 设置 30 秒超时
- * app.use(timeout({
- *   timeout: 30000,
- * }));
- *
- * // 设置 5 分钟超时
- * app.use(timeout({
- *   timeout: 300000,
- * }));
+ * app.use(timeout({ timeout: 30000 }));
+ * app.use(timeout({ timeout: 300000, message: "Gateway Timeout" }));
  * ```
  */
 export function timeout(

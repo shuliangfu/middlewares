@@ -9,38 +9,34 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Options for health check middleware (path, custom check function).
+ * 健康检查中间件的配置选项。
+ *
+ * 用于配置健康检查路径与可选的自定义检查逻辑（如数据库、缓存连通性）。
  */
 export interface HealthCheckOptions {
-  /** 健康检查路径（默认：/health） */
+  /** 健康检查请求路径，默认 "/health" */
   path?: string;
-  /** 健康检查函数（可选，用于自定义健康检查逻辑） */
+  /**
+   * 自定义检查函数；返回 { healthy, details? }，用于依赖检查（DB、Redis 等）。
+   * 未提供则直接返回 200 与 { status: "ok" }。
+   */
   check?: () => Promise<
     { healthy: boolean; details?: Record<string, unknown> }
   >;
 }
 
 /**
- * Creates health check middleware. Serves a configurable health endpoint.
+ * 创建健康检查中间件。
  *
- * @param options 健康检查配置选项
- * @returns 健康检查中间件函数
+ * 对指定路径的 GET/HEAD 请求返回 JSON 健康状态，供监控与负载均衡探测。
+ *
+ * @param options - 路径与可选检查函数；未传则使用 path="/health"
+ * @returns 符合 {@link Middleware} 的健康检查中间件
  *
  * @example
  * ```typescript
- * import { healthCheck } from "@dreamer/server";
- *
- * // 使用默认配置
  * app.use(healthCheck());
- *
- * // 自定义路径和检查函数
- * app.use(healthCheck({
- *   path: "/healthz",
- *   check: async () => {
- *     // 检查数据库连接等
- *     return { healthy: true, details: { db: "connected" } };
- *   },
- * }));
+ * app.use(healthCheck({ path: "/healthz", check: async () => ({ healthy: true, details: { db: "ok" } }) }));
  * ```
  */
 export function healthCheck(

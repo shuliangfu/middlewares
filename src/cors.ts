@@ -9,35 +9,36 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Options for CORS middleware (origin, methods, headers, credentials, maxAge).
+ * CORS 中间件的配置选项。
+ *
+ * 用于配置允许的源、方法、请求头、是否携带凭证及预检缓存时间。
  */
 export interface CorsOptions {
-  /** 允许的源（字符串、字符串数组或函数） */
+  /** 允许的源：字符串、字符串数组，或 (origin) => boolean；默认 "*" */
   origin?: string | string[] | ((origin: string) => boolean);
-  /** 允许的 HTTP 方法 */
+  /** 允许的 HTTP 方法列表，默认含 GET/POST/PUT/DELETE/PATCH/OPTIONS */
   methods?: string[];
-  /** 允许的请求头 */
+  /** 允许的请求头列表，默认含 Content-Type、Authorization */
   allowedHeaders?: string[];
-  /** 暴露的响应头 */
+  /** 暴露给前端的响应头列表 */
   exposedHeaders?: string[];
-  /** 是否允许携带凭证 */
+  /** 是否允许携带 Cookie/凭证（credentials: "include"） */
   credentials?: boolean;
-  /** 预检请求的缓存时间（秒） */
+  /** 预检请求（OPTIONS）结果缓存时间（秒） */
   maxAge?: number;
 }
 
 /**
- * 创建 CORS 中间件
+ * 创建 CORS 中间件。
  *
- * @param options CORS 配置选项
- * @returns CORS 中间件函数
+ * 处理跨域请求与 OPTIONS 预检，设置 Access-Control-* 响应头。
+ *
+ * @param options - CORS 配置；未传则允许任意源、常用方法与请求头
+ * @returns 符合 {@link Middleware} 的 CORS 中间件
  *
  * @example
  * ```typescript
- * app.use(cors({
- *   origin: "https://example.com",
- *   credentials: true,
- * }));
+ * app.use(cors({ origin: "https://example.com", credentials: true }));
  * ```
  */
 export function cors(options: CorsOptions = {}): Middleware<HttpContext> {

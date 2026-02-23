@@ -1,11 +1,18 @@
 /**
  * @module @dreamer/middlewares
  *
- * Main entry point. Exports all built-in HTTP middlewares: body parser, compression,
- * CORS, CSRF, error handler, health check, metrics, performance analyzer, rate limit,
- * request id, request logger, request signature, request validator, response cache,
- * security headers, static files, and timeout. Compatible with @dreamer/server and
- * HttpContext-based frameworks.
+ * 内置 HTTP 中间件包入口。提供 body 解析、压缩、CORS、CSRF、错误处理、健康检查、
+ * 指标、性能分析、限流、Request ID、请求日志、签名、校验、响应缓存、安全头、
+ * 静态文件与超时等中间件，兼容 @dreamer/server 及基于 HttpContext 的框架。
+ *
+ * @see {@link bodyParser} - 请求体解析（JSON / 表单 / 文本 / 原始）
+ * @see {@link compression} - 响应压缩（gzip / Brotli）
+ * @see {@link cors} - 跨域
+ * @see {@link errorHandler} - 统一错误处理
+ * @see {@link requestId} - 请求 ID
+ * @see {@link requestLogger} - 请求日志
+ * @see {@link staticFiles} - 静态文件
+ * @see {@link timeout} - 请求超时
  */
 
 export { bodyParser, type BodyParserOptions } from "./body-parser.ts";

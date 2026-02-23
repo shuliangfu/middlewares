@@ -10,21 +10,25 @@ import type { HttpContext } from "@dreamer/server";
 import { $tr } from "./i18n.ts";
 
 /**
- * Function type that generates a CSRF token string (e.g. random bytes).
+ * CSRF Token 生成函数类型。
+ *
+ * 应返回不可预测的随机字符串，供 double-submit cookie 方案使用。
  */
 export type CsrfTokenGenerator = () => string;
 
 /**
- * Options for CSRF middleware (cookie/header names, cookie options, skip/verify logic).
+ * CSRF 中间件的配置选项。
+ *
+ * 用于配置 Cookie/头/表单字段名、Cookie 选项及跳过/验证逻辑。
  */
 export interface CsrfOptions {
-  /** Cookie 名称（默认：_csrf） */
+  /** 存放 token 的 Cookie 名称，默认 "_csrf" */
   cookieName?: string;
-  /** 请求头名称（默认：X-CSRF-Token） */
+  /** 客户端需回传的请求头名称，默认 "X-CSRF-Token" */
   headerName?: string;
-  /** 表单字段名称（默认：_csrf） */
+  /** 表单中 token 字段名，默认 "_csrf" */
   fieldName?: string;
-  /** Cookie 选项 */
+  /** Cookie 的 secure、httpOnly、sameSite、path、domain 等选项 */
   cookieOptions?: {
     /** 是否只在 HTTPS 下发送（默认：true） */
     secure?: boolean;

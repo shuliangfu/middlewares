@@ -1,54 +1,57 @@
 /**
  * 文件缓存实现（LRU Cache）
  *
- * 用于静态文件中间件的内存缓存
+ * 用于静态文件中间件的内存缓存，支持按容量淘汰与可选 TTL 过期。
  */
 
 /**
- * 缓存项
+ * 单条文件缓存项，包含内容、元数据及时间戳。
  */
 interface CacheItem {
-  /** 文件内容 */
+  /** 文件二进制内容 */
   content: Uint8Array;
-  /** 文件元数据 */
+  /** 文件元数据（大小、修改时间、Content-Type、ETag） */
   metadata: {
-    /** 文件大小 */
+    /** 文件大小（字节） */
     size: number;
-    /** 修改时间 */
+    /** 文件系统修改时间，用于校验是否过期 */
     mtime: number | Date | null;
-    /** Content-Type */
+    /** HTTP Content-Type */
     contentType: string;
-    /** ETag 值 */
+    /** 用于条件请求的 ETag 值 */
     etag: string;
   };
-  /** 缓存时间戳 */
+  /** 写入缓存时的时间戳，用于 TTL 判断 */
   timestamp: number;
-  /** 访问时间戳（用于 LRU） */
+  /** 最近一次访问时间戳，用于 LRU 淘汰 */
   accessTime: number;
 }
 
 /**
- * LRU 文件缓存
+ * LRU 文件缓存类。
+ *
+ * 基于最大容量与可选 TTL 的内存缓存，用于静态文件中间件。
+ * 容量超限时按访问时间淘汰最久未使用的项；单条超过 maxSize 则不缓存。
  */
 export class FileCache {
-  /** 缓存存储 */
+  /** 键到缓存项的映射 */
   private cache: Map<string, CacheItem>;
-  /** 最大缓存大小（字节） */
+  /** 允许的最大缓存总大小（字节） */
   private maxSize: number;
-  /** 当前缓存大小（字节） */
+  /** 当前已缓存内容总大小（字节） */
   private currentSize: number;
-  /** TTL（毫秒，0 表示不过期） */
+  /** 生存时间（毫秒），0 表示不按时间过期 */
   private ttl: number;
 
   /**
-   * 创建文件缓存实例
+   * 创建文件缓存实例。
    *
-   * @param options 缓存配置选项
+   * @param options - 缓存配置；未传则使用默认 maxSize 50MB、ttl 0
    */
   constructor(options: {
-    /** 最大缓存大小（字节，默认：50MB） */
+    /** 最大缓存总大小（字节），默认 50MB */
     maxSize?: number;
-    /** TTL（毫秒，默认：0 表示不过期） */
+    /** 生存时间（毫秒），0 表示不过期，默认 0 */
     ttl?: number;
   } = {}) {
     this.cache = new Map();
@@ -58,10 +61,12 @@ export class FileCache {
   }
 
   /**
-   * 获取缓存项
+   * 根据键获取缓存项。
    *
-   * @param key 缓存键（文件路径）
-   * @returns 缓存项，如果不存在或已过期则返回 null
+   * 若存在且未过期会更新 accessTime；若已过期则删除该键并返回 null。
+   *
+   * @param key - 缓存键（通常为文件路径）
+   * @returns 缓存项，不存在或已过期时返回 null
    */
   get(key: string): CacheItem | null {
     const item = this.cache.get(key);
@@ -84,11 +89,14 @@ export class FileCache {
   }
 
   /**
-   * 设置缓存项
+   * 写入或覆盖一条缓存项。
    *
-   * @param key 缓存键（文件路径）
-   * @param content 文件内容
-   * @param metadata 文件元数据
+   * 若单条内容超过 maxSize 则不缓存；若当前容量不足会先按 LRU 淘汰再写入。
+   * 若 key 已存在会先减去旧项大小再计入新项。
+   *
+   * @param key - 缓存键（通常为文件路径）
+   * @param content - 文件二进制内容
+   * @param metadata - 文件元数据（size、mtime、contentType、etag）
    */
   set(
     key: string,
@@ -132,9 +140,9 @@ export class FileCache {
   }
 
   /**
-   * 删除缓存项
+   * 删除指定键的缓存项并释放其占用的容量。
    *
-   * @param key 缓存键
+   * @param key - 要删除的缓存键；若不存在则无效果
    */
   delete(key: string): void {
     const item = this.cache.get(key);
@@ -145,7 +153,7 @@ export class FileCache {
   }
 
   /**
-   * 清空所有缓存
+   * 清空所有缓存项并将当前容量置零。
    */
   clear(): void {
     this.cache.clear();
@@ -153,13 +161,15 @@ export class FileCache {
   }
 
   /**
-   * 获取缓存统计信息
+   * 返回当前缓存的统计信息。
+   *
+   * @returns 包含 size（当前占用字节）、count（条数）、maxSize（容量上限）、usage（使用率 0–1）的对象
    */
   getStats(): {
     size: number;
     count: number;
     maxSize: number;
-    usage: number; // 使用率（0-1）
+    usage: number;
   } {
     return {
       size: this.currentSize,
@@ -170,7 +180,9 @@ export class FileCache {
   }
 
   /**
-   * 删除最久未使用的项（LRU）
+   * 按访问时间淘汰一条最久未使用的缓存项（LRU）。
+   *
+   * 用于在 set 时容量不足时腾出空间；内部使用，不对外暴露。
    */
   private evictLRU(): void {
     let oldestKey: string | null = null;
@@ -189,11 +201,13 @@ export class FileCache {
   }
 
   /**
-   * 检查文件是否已更改（通过比较 mtime）
+   * 根据文件修改时间判断缓存是否已失效。
    *
-   * @param key 缓存键
-   * @param mtime 文件修改时间
-   * @returns 如果文件已更改返回 true
+   * 用于静态文件中间件在命中缓存前校验磁盘上的文件是否被修改。
+   *
+   * @param key - 缓存键
+   * @param mtime - 当前文件的修改时间（来自 stat）
+   * @returns 若 key 不存在或 mtime 与缓存中不一致则返回 true（视为过期）
    */
   isStale(key: string, mtime: number | Date | null): boolean {
     const item = this.cache.get(key);

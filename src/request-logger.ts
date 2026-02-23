@@ -11,37 +11,38 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Options for request logger (logger, level, format, skip, detailed, etc.).
+ * 请求日志中间件的配置选项。
+ *
+ * 用于配置 logger 实例、日志级别与格式、是否包含头/体、是否详细输出及跳过条件。
  */
 export interface RequestLoggerOptions {
-  /** Logger 实例（可选，如果提供则使用，否则创建默认 logger） */
+  /** 日志实例；未提供则使用 createLogger() */
   logger?: Logger;
-  /** 日志级别（默认：info） */
+  /** 日志级别，默认 "info" */
   level?: LogLevel;
-  /** 日志格式（默认：text） */
+  /** 输出格式："text" 或 "json"，默认 "text" */
   format?: "json" | "text";
-  /** 是否包含请求头 */
+  /** 是否在日志中包含请求头 */
   includeHeaders?: boolean;
-  /** 是否包含请求体 */
+  /** 是否在日志中包含请求体 */
   includeBody?: boolean;
-  /** 是否输出详细日志（含 requestId、query、userAgent，便于 prod 排查） */
+  /** 是否输出详细日志（含 requestId、query、userAgent），便于生产排查 */
   detailed?: boolean;
-  /** 跳过日志的路径（返回 true 则不记录，如过滤 /.well-known/ 等内部请求） */
+  /** 跳过记录：返回 true 的请求不写日志（如 /.well-known/） */
   skip?: (ctx: HttpContext) => boolean;
 }
 
 /**
- * Creates request logger middleware. Logs each request and response.
+ * 创建请求日志中间件。
  *
- * @param options 请求日志配置选项
- * @returns 请求日志中间件函数
+ * 在请求完成后记录方法、路径、状态码、耗时等信息，可选包含 requestId、query 等。
+ *
+ * @param options - 请求日志配置；未传则使用默认 logger 与 info 级别
+ * @returns 符合 {@link Middleware} 的请求日志中间件
  *
  * @example
  * ```typescript
- * app.use(requestLogger({
- *   level: "info",
- *   includeHeaders: true,
- * }));
+ * app.use(requestLogger({ level: "info", includeHeaders: true }));
  * ```
  */
 export function requestLogger(

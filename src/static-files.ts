@@ -18,43 +18,44 @@ import { FileCache } from "./file-cache.ts";
 import { $tr } from "./i18n.ts";
 
 /**
- * Options for static files middleware (root, prefix, index, cache, maxAge, etc.).
+ * 静态文件中间件的配置选项。
+ *
+ * 用于配置根目录、URL 前缀、默认首页、点文件策略、ETag/Last-Modified 及内存缓存。
  */
 export interface StaticFilesOptions {
-  /** 静态文件根目录 */
+  /** 静态文件根目录（绝对或相对路径） */
   root: string;
-  /** URL 前缀（默认：/） */
+  /** URL 前缀，默认 "/" */
   prefix?: string;
-  /** 默认文件（如 index.html） */
+  /** 目录请求的默认文件，如 "index.html" 或 ["index.html", "default.html"] */
   index?: string | string[];
-  /** 点文件处理（allow、deny、ignore） */
+  /** 点文件（如 .htaccess）策略：allow / deny / ignore，默认 "ignore" */
   dotfiles?: "allow" | "deny" | "ignore";
-  /** 启用 ETag */
+  /** 是否启用 ETag 响应头，默认 true */
   etag?: boolean;
-  /** 启用 Last-Modified */
+  /** 是否启用 Last-Modified 响应头，默认 true */
   lastModified?: boolean;
-  /** 缓存时间（秒） */
+  /** Cache-Control max-age（秒） */
   maxAge?: number;
-  /** 启用内存缓存（默认：true） */
+  /** 是否启用内存缓存，默认 true */
   enableCache?: boolean;
-  /** 缓存最大大小（字节，默认：50MB） */
+  /** 内存缓存最大容量（字节），默认 50MB */
   cacheMaxSize?: number;
-  /** 缓存 TTL（毫秒，0 表示不过期，默认：0） */
+  /** 内存缓存 TTL（毫秒），0 表示不过期，默认 0 */
   cacheTTL?: number;
 }
 
 /**
- * Creates static files middleware. Serves files from a directory with optional cache.
+ * 创建静态文件中间件。
  *
- * @param options 静态文件配置选项
- * @returns 静态文件中间件函数
+ * 从指定根目录提供静态文件，支持前缀、默认首页、ETag/Last-Modified 及可配置内存缓存。
+ *
+ * @param options - 静态文件配置；root 必填，其余可选
+ * @returns 符合 {@link Middleware} 的静态文件中间件
  *
  * @example
  * ```typescript
- * app.use(staticFiles({
- *   root: "./public",
- *   prefix: "/static",
- * }));
+ * app.use(staticFiles({ root: "./public", prefix: "/static" }));
  * ```
  */
 // 全局文件缓存（每个配置一个实例）

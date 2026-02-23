@@ -12,18 +12,20 @@ import type { HttpContext, HttpError } from "@dreamer/server";
 import { $tr } from "./i18n.ts";
 
 /**
- * Options for error handler (logger, isDev, includeDetails, formatError, etc.).
+ * 错误处理中间件的配置选项。
+ *
+ * 用于配置 logger、是否开发模式、是否在响应中返回错误详情及自定义格式化。
  */
 export interface ErrorHandlerOptions {
-  /** Logger 实例（可选，如果提供则使用，否则创建默认 logger） */
+  /** 日志实例；未提供则使用 createLogger() 创建默认 logger */
   logger?: Logger;
-  /** 是否为开发模式（开发模式下自动包含详细错误信息） */
+  /** 是否为开发模式；为 true 时自动在响应中包含详细错误信息 */
   isDev?: boolean;
-  /** 是否在响应中包含错误详情（生产环境建议关闭） */
+  /** 是否在响应体中包含错误详情（堆栈等）；生产环境建议 false */
   includeDetails?: boolean;
-  /** 是否提供错误修复建议（仅开发模式） */
+  /** 是否在开发模式下提供修复建议 */
   provideSuggestions?: boolean;
-  /** 自定义错误响应格式化函数 */
+  /** 自定义错误到 HTTP 响应的格式化函数 */
   formatError?: (
     error: Error,
     ctx: HttpContext,
@@ -34,23 +36,17 @@ export interface ErrorHandlerOptions {
 }
 
 /**
- * Creates error handler middleware. Catches errors and formats responses.
+ * 创建错误处理中间件。
  *
- * @param options 错误处理配置选项
- * @returns 错误处理中间件函数
+ * 捕获下游中间件与路由抛出的错误，记录日志并按配置格式化为统一 HTTP 错误响应。
+ *
+ * @param options - 错误处理配置；未传则使用默认 logger、非开发模式
+ * @returns 符合 {@link ErrorMiddleware} 的错误处理中间件
  *
  * @example
  * ```typescript
- * // 生产环境
- * app.useError(errorHandler({
- *   includeDetails: false,
- * }));
- *
- * // 开发环境
- * app.useError(errorHandler({
- *   isDev: true,
- *   provideSuggestions: true,
- * }));
+ * app.useError(errorHandler({ includeDetails: false }));
+ * app.useError(errorHandler({ isDev: true, provideSuggestions: true }));
  * ```
  */
 export function errorHandler(

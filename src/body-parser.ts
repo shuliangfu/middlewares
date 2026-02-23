@@ -9,48 +9,50 @@ import type { Middleware } from "@dreamer/middleware";
 import type { HttpContext } from "@dreamer/server";
 
 /**
- * Options for body parser (JSON, urlencoded, text, raw limits and options).
+ * Body Parser 中间件的配置选项。
+ *
+ * 用于控制 JSON、URL-encoded、text、raw 等请求体的解析与大小限制。
  */
 export interface BodyParserOptions {
-  /** JSON 解析选项 */
+  /** JSON 请求体解析选项；未配置则使用默认 limit 1MB */
   json?: {
-    /** 大小限制（字节） */
+    /** 最大 body 大小（字节），默认 1MB */
     limit?: number;
-    /** 是否严格模式 */
+    /** 是否严格模式（仅接受数组和对象） */
     strict?: boolean;
   };
-  /** URL 编码表单解析选项 */
+  /** application/x-www-form-urlencoded 表单解析选项 */
   urlencoded?: {
-    /** 大小限制（字节） */
+    /** 最大 body 大小（字节） */
     limit?: number;
-    /** 是否扩展模式（暂不支持，保留接口） */
+    /** 是否扩展模式（暂未实现，保留接口） */
     extended?: boolean;
   };
-  /** 文本解析选项 */
+  /** 文本请求体解析选项 */
   text?: {
-    /** 大小限制（字节） */
+    /** 最大 body 大小（字节） */
     limit?: number;
     /** 默认字符集 */
     defaultCharset?: string;
   };
-  /** 原始数据解析选项 */
+  /** 原始二进制请求体解析选项 */
   raw?: {
-    /** 大小限制（字节） */
+    /** 最大 body 大小（字节） */
     limit?: number;
   };
 }
 
 /**
- * 创建 Body Parser 中间件
+ * 创建 Body Parser 中间件。
  *
- * @param options Body Parser 配置选项
- * @returns Body Parser 中间件函数
+ * 根据 Content-Type 解析请求体为 JSON、表单、文本或原始 Buffer，并挂到 ctx.state.body。
+ *
+ * @param options - 各类型 body 的解析选项与大小限制；未传则使用默认 limit 1MB
+ * @returns 符合 {@link Middleware} 的 body 解析中间件
  *
  * @example
  * ```typescript
- * app.use(bodyParser({
- *   json: { limit: 1024 * 1024 }, // 1MB
- * }));
+ * app.use(bodyParser({ json: { limit: 1024 * 1024 } }));
  * ```
  */
 export function bodyParser(

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.3] - 2026-02-23
+
+### Added
+
+- **CI**: Bun test jobs (`test-linux-bun`, `test-macos-bun`, `test-windows-bun`)
+  for Linux, macOS, and Windows; run `bun install` and `bun test tests/` to
+  verify compatibility with Bun.
+
+### Changed
+
+- **Compression**: Brotli is now loaded via dynamic `import("brotli")` only when
+  `compressBrotli()` is called (e.g. when compression middleware is used with
+  `enableBrotli` and a request needs Brotli). This avoids loading the Brotli
+  Emscripten bundle at module load time, fixing CI failures on Bun
+  (Linux/macOS/Windows) with "(void 0) is not a function" when any code imports
+  from `@dreamer/middlewares`.
+- **JSDoc**: Expanded documentation for options and factory functions
+  (compression, body-parser, cors, error-handler, request-id, request-logger,
+  health-check, static-files, timeout, csrf, response-cache); added class and
+  method JSDoc for `FileCache` and `ResponseCache` (and internal `CacheItem`);
+  improved module doc in main entry with `@see` links.
+
+---
+
 ## [1.0.2] - 2026-02-19
 
 ### Added
