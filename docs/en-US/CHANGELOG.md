@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.4] - 2026-02-25
+
+### Removed
+
+- **i18n exports**: `detectLocale`, `setMiddlewaresLocale`, and `Locale` are no
+  longer exported from the main entry. i18n remains used internally for
+  middleware messages; use `@dreamer/i18n` directly if you need locale
+  utilities.
+
+---
+
 ## [1.0.3] - 2026-02-23
 
 ### Added

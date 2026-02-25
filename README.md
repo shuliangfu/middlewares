@@ -193,9 +193,9 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ## 📝 Changelog
 
-- **v1.0.3** (2026-02-23): Added CI Bun test jobs (Linux/macOS/Windows). Brotli
-  lazy-load fix for Bun; expanded JSDoc for options, factories, FileCache and
-  ResponseCache. [Full changelog](./docs/en-US/CHANGELOG.md)
+- **v1.0.4** (2026-02-25): Removed i18n exports (`detectLocale`,
+  `setMiddlewaresLocale`, `Locale`) from main entry; i18n still used internally.
+  [Full changelog](./docs/en-US/CHANGELOG.md)
 
 ---
 
