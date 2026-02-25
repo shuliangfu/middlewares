@@ -1,6 +1,6 @@
 {
   "name": "@dreamer/middlewares",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "HTTP middlewares for Deno/Bun, compatible with @dreamer/server.",
   "type": "module",
   "license": "Apache-2.0",
