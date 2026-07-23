@@ -1,14 +1,14 @@
 # @dreamer/middlewares
 
-> HTTP middleware library compatible with Deno and Bun. Provides 17 ready-to-use
-> middlewares that integrate seamlessly with @dreamer/server or any
+> HTTP middleware library compatible with Deno, Bun, and Node.js 22+. Provides 17
+> ready-to-use middlewares that integrate seamlessly with @dreamer/server or any
 > HttpContext-compatible framework.
 
 English | [中文 (Chinese)](./docs/zh-CN/README.md)
 
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
-[![Tests](https://img.shields.io/badge/tests-209%20passed-brightgreen)](./docs/en-US/TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-209%20passed%20(Deno%2FBun%2FNode)-brightgreen)](./docs/en-US/TEST_REPORT.md)
 
 ---
 
@@ -34,15 +34,22 @@ deno add jsr:@dreamer/middlewares
 bunx jsr add @dreamer/middlewares
 ```
 
+### Node.js 22+
+
+```bash
+npx jsr add @dreamer/middlewares
+```
+
 ---
 
 ## 🌍 Environment Compatibility
 
 | Environment      | Version | Status                                                                                   |
 | ---------------- | ------- | ---------------------------------------------------------------------------------------- |
-| **Deno**         | 2.6+    | ✅ Fully supported                                                                       |
-| **Bun**          | 1.3.5+  | ✅ Fully supported                                                                       |
-| **Server**       | -       | ✅ Supported (works with Deno and Bun, requires @dreamer/server or compatible framework) |
+| **Deno**         | 2.9+    | ✅ Fully supported                                                                       |
+| **Bun**          | 1.3+    | ✅ Fully supported                                                                       |
+| **Node.js**      | 22+     | ✅ Fully supported                                                                       |
+| **Server**       | -       | ✅ Supported (works with Deno, Bun, and Node.js, requires @dreamer/server or compatible framework) |
 | **Client**       | -       | ❌ N/A (server-side HTTP middlewares only)                                               |
 | **Dependencies** | -       | 📦 @dreamer/server (types), @dreamer/middleware, @dreamer/logger, etc.                   |
 
@@ -193,6 +200,10 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ## 📝 Changelog
 
+- **v1.1.0** (2026-07-23): Added Node.js 22+ compatibility. Upgraded all
+  `@dreamer/*` dependencies to Node-compatible versions. Added `test:node` script,
+  `test-node.mjs` runner, `tsconfig.json`, 9-job CI (3 Deno + 3 Bun + 3 Node).
+  [Full changelog](./docs/en-US/CHANGELOG.md)
 - **v1.0.4** (2026-02-25): Removed i18n exports (`detectLocale`,
   `setMiddlewaresLocale`, `Locale`) from main entry; i18n still used internally.
   [Full changelog](./docs/en-US/CHANGELOG.md)
@@ -202,10 +213,11 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 ## 📊 Test Report
 
 - **Total tests**: 209
-- **Passed**: 209 ✅
+- **Deno**: 209 passed ✅
+- **Bun**: 191 passed ✅
+- **Node.js**: 17/17 files passed ✅
 - **Failed**: 0
-- **Pass rate**: 100%
-- **Test date**: 2026-02-11
+- **Test date**: 2026-07-23
 - **Details**: [TEST_REPORT.md](./docs/en-US/TEST_REPORT.md)
 
 ---

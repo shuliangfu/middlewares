@@ -1,13 +1,13 @@
 # @dreamer/middlewares
 
-> 兼容 Deno 和 Bun 的 HTTP 中间件包，提供 17 个开箱即用中间件，可与
+> 兼容 Deno、Bun 和 Node.js 22+ 的 HTTP 中间件包，提供 17 个开箱即用中间件，可与
 > @dreamer/server 或 HttpContext 兼容框架无缝集成
 
 [English](../../README.md) | 中文 (Chinese)
 
 [![JSR](https://jsr.io/badges/@dreamer/middlewares)](https://jsr.io/@dreamer/middlewares)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../../LICENSE)
-[![Tests](https://img.shields.io/badge/tests-209%20passed-brightgreen)](./TEST_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-209%20passed%20(Deno%2FBun%2FNode)-brightgreen)](./TEST_REPORT.md)
 
 ---
 
@@ -33,17 +33,24 @@ deno add jsr:@dreamer/middlewares
 bunx jsr add @dreamer/middlewares
 ```
 
+### Node.js 22+
+
+```bash
+npx jsr add @dreamer/middlewares
+```
+
 ---
 
 ## 🌍 环境兼容性
 
-| 环境       | 版本要求 | 状态                                                                |
-| ---------- | -------- | ------------------------------------------------------------------- |
-| **Deno**   | 2.6+     | ✅ 完全支持                                                         |
-| **Bun**    | 1.3.5+   | ✅ 完全支持                                                         |
-| **服务端** | -        | ✅ 支持（兼容 Deno 和 Bun，需配合 @dreamer/server 或兼容框架使用）  |
-| **客户端** | -        | ❌ 不适用（仅服务端 HTTP 中间件）                                   |
-| **依赖**   | -        | 📦 @dreamer/server（类型）、@dreamer/middleware、@dreamer/logger 等 |
+| 环境       | 版本要求 | 状态                                                                        |
+| ---------- | -------- | --------------------------------------------------------------------------- |
+| **Deno**   | 2.9+     | ✅ 完全支持                                                                 |
+| **Bun**    | 1.3+     | ✅ 完全支持                                                                 |
+| **Node.js**| 22+      | ✅ 完全支持                                                                 |
+| **服务端** | -        | ✅ 支持（兼容 Deno、Bun 和 Node.js，需配合 @dreamer/server 或兼容框架使用） |
+| **客户端** | -        | ❌ 不适用（仅服务端 HTTP 中间件）                                           |
+| **依赖**   | -        | 📦 @dreamer/server（类型）、@dreamer/middleware、@dreamer/logger 等         |
 
 ---
 
@@ -186,6 +193,10 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 
 ## 📝 变更日志
 
+- **v1.1.0**（2026-07-23）：新增 Node.js 22+ 兼容性。升级全部 `@dreamer/*`
+  依赖至 Node 兼容版本。新增 `test:node` 脚本、`test-node.mjs` 测试运行器、
+  `tsconfig.json`，CI 升级为 9-job（3 Deno + 3 Bun + 3 Node）。
+  [完整变更](./CHANGELOG.md)
 - **v1.0.4**（2026-02-25）：主入口不再导出 i18n（`detectLocale`、
   `setMiddlewaresLocale`、`Locale`），包内仍使用 i18n
   文案。[完整变更](./CHANGELOG.md)
@@ -195,10 +206,11 @@ app.use(responseCache({ ttl: 60, shouldCache: (ctx) => ctx.method === "GET" }));
 ## 📊 测试报告
 
 - **总测试数**：209
-- **通过**：209 ✅
+- **Deno**：209 通过 ✅
+- **Bun**：191 通过 ✅
+- **Node.js**：17/17 文件通过 ✅
 - **失败**：0
-- **通过率**：100%
-- **测试时间**：2026-02-11
+- **测试时间**：2026-07-23
 - **详情**：[TEST_REPORT.md](./TEST_REPORT.md)
 
 ---

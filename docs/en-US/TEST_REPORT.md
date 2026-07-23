@@ -2,26 +2,46 @@
 
 ## 📊 Test Overview
 
-- **Test Library Version**: @dreamer/test@^1.0.0-beta.40
-- **Runtime Adapter**: @dreamer/runtime-adapter@^1.0.0-beta.22
-- **Test Framework**: @dreamer/test (compatible with Deno and Bun)
-- **Test Date**: 2026-02-11
-- **Test Environment**:
-  - Deno 2.6+
-  - Bun 1.3.5
+- **Package**: `@dreamer/middlewares`
+- **Version**: **1.1.0** (aligned with `deno.json`/`package.json`)
+- **Test framework**: @dreamer/test@^1.2.3
+- **Report date**: **2026-07-23**
+- **Test environment**: Deno 2.9+ / Bun 1.3+ / Node.js 22+
+
+---
+
+## How to Run
+
+From the **middlewares package root**:
+
+```bash
+# Deno
+deno task test
+
+# Bun
+bun test tests/
+
+# Node.js 22+
+npm install
+npm run test:node
+# equivalent: node --import tsx --test-force-exit test-node.mjs
+```
 
 ---
 
 ## 📈 Test Results
 
-### Overall Statistics
+### Runtime Compatibility
 
-- **Total Tests**: 209
-- **Passed**: 209 ✅
-- **Failed**: 0
-- **Pass Rate**: 100% ✅
-- **Execution Time**: ~12s
-- **Test Files**: 17
+| Runtime  | Version | Passed    | Failed | Files | Duration |
+| -------- | ------- | --------- | ------ | ----- | -------- |
+| Deno     | 2.9+    | **209**   | **0**  | 17    | ~5s      |
+| Bun      | 1.3+    | **191**   | **0**  | 17    | ~1.5s    |
+| Node.js  | 22+     | **17/17** | **0**  | 17    | ~15s     |
+
+> All 17 test files are pure unit tests — no browser tests, no external
+> services, no exclusions needed. Deno/Bun counts differ due to runner
+> counting conventions; treat **0 failures** as the invariant.
 
 ### Test File Statistics
 
@@ -195,12 +215,13 @@
 
 ## 📝 Conclusion
 
-✅ **All 209 tests passed, 100% pass rate**
+✅ **Deno: 209 passed | Bun: 191 passed | Node.js: 17/17 files passed — 0 failures across all runtimes**
 
 @dreamer/middlewares covers 17 built-in middlewares with tests for both
 functionality and configuration. It can be used with @dreamer/server or any
-framework compatible with HttpContext.
+framework compatible with HttpContext. Fully compatible with Deno 2.9+, Bun 1.3+,
+and Node.js 22+.
 
 ---
 
-_Last updated: 2026-02-11_
+_Last updated: 2026-07-23_

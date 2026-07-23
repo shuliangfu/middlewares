@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] - 2026-07-23
+
+### Added
+
+- **Node.js 22+ compatibility**: Full support for Node.js 22+ alongside Deno and
+  Bun. All `@dreamer/*` dependencies upgraded to Node-compatible versions
+  (runtime-adapter ^1.2.2, server ^1.2.1, i18n ^1.1.2, middleware ^1.1.0, logger
+  ^1.1.0, test ^1.2.3).
+- **Node.js test infrastructure**: `test-node.mjs` runner (main-process execution,
+  no fork/IPC), `tsconfig.json` (Bundler module resolution), `test:node` script
+  in deno.json and package.json.
+- **9-job CI matrix**: 3 Deno v2.9 + 3 Bun + 3 Node 22 (Linux/macOS/Windows).
+  Upgraded from 6-job (Deno v2.5 + Bun only). No Chromium, no external services.
+- `engines.node: ">=22"` in package.json.
+- `minimumDependencyAge: "0"` in deno.json for global JSR dependency resolution.
+- `.gitignore` ignores `package-lock.json`.
+
+### Changed
+
+- `deno.json` and `package.json` dependency versions synchronized (both use `^`
+  ranges for `@dreamer/*` packages).
+- Deno version in CI upgraded from v2.5 to v2.9.
+- CI Deno test command includes `--minimum-dependency-age=0`.
+
+### Notes
+
+- **src is runtime-agnostic**: zero `Deno.*` API calls, zero `IS_NODE` checks —
+  pure logic + cross-runtime Web API. No source code changes needed for Node.js
+  support; all runtime differences are abstracted through `@dreamer/runtime-adapter`.
+- Test assertions are locale-safe: `csrf.test.ts` and `request-validator.test.ts`
+  use `setMiddlewaresLocale("en-US")` to lock English assertions (CI-safe).
+- `performance-analyzer.ts` `location.reload()` is client-side `<script>` HTML
+  output, not server-side code — no Node.js guard needed.
+- `rate-limit.ts` `setInterval` type is implicitly inferred; `clearInterval` works
+  across all runtimes.
+
+---
+
 ## [1.0.4] - 2026-02-25
 
 ### Removed

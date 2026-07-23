@@ -7,6 +7,41 @@
 
 ---
 
+## [1.1.0] - 2026-07-23
+
+### 新增
+
+- **Node.js 22+ 兼容性**：全面支持 Node.js 22+，与 Deno、Bun 三端并行。全部
+  `@dreamer/*` 依赖升级至 Node 兼容版本（runtime-adapter ^1.2.2、server ^1.2.1、
+  i18n ^1.1.2、middleware ^1.1.0、logger ^1.1.0、test ^1.2.3）。
+- **Node.js 测试基础设施**：`test-node.mjs` 测试运行器（主进程内执行，无
+  fork/IPC）、`tsconfig.json`（Bundler 模块解析）、deno.json 与 package.json 的
+  `test:node` 脚本。
+- **9-job CI 矩阵**：3 Deno v2.9 + 3 Bun + 3 Node 22（Linux/macOS/Windows）。
+  从 6-job（Deno v2.5 + Bun）升级。无 Chromium、无外部服务。
+- package.json 新增 `engines.node: ">=22"`。
+- deno.json 新增 `minimumDependencyAge: "0"`（全局 JSR 依赖解析）。
+- `.gitignore` 忽略 `package-lock.json`。
+
+### 变更
+
+- `deno.json` 与 `package.json` 依赖版本同步（均使用 `^` 范围）。
+- CI Deno 版本从 v2.5 升级至 v2.9。
+- CI Deno 测试命令加入 `--minimum-dependency-age=0`。
+
+### 说明
+
+- **src 运行时无关**：零 `Deno.*` API 调用、零 `IS_NODE` 检查——纯逻辑 + 跨运行时
+  Web API。Node.js 支持无需任何源码改动，运行时差异全部经 `@dreamer/runtime-adapter`
+  抽象。
+- 测试断言 locale 安全：`csrf.test.ts` 与 `request-validator.test.ts` 使用
+  `setMiddlewaresLocale("en-US")` 锁定英文断言（CI 安全）。
+- `performance-analyzer.ts` 的 `location.reload()` 是客户端 `<script>` HTML 输出，
+  非服务端代码——无需 Node.js 守卫。
+- `rate-limit.ts` 的 `setInterval` 类型为隐式推断；`clearInterval` 三端通用。
+
+---
+
 ## [1.0.4] - 2026-02-25
 
 ### 移除
