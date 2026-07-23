@@ -38,7 +38,9 @@ describe("Performance Analyzer 中间件", () => {
       expect(stats.requests[0].method).toBe("GET");
       expect(stats.requests[0].path).toBe("/api");
       expect(stats.requests[0].duration).toBeDefined();
-      expect(stats.requests[0].duration!).toBeGreaterThanOrEqual(10);
+      // setTimeout 不保证精确（W3C 允许提前触发），CI Linux 实测 9.75ms。
+      // 阈值降至 5 留足余量，验证 duration 被正确记录且有合理值即可。
+      expect(stats.requests[0].duration!).toBeGreaterThanOrEqual(5);
     });
 
     it("应该提供性能报告端点", async () => {
