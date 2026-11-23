@@ -51,6 +51,28 @@ export function cors(options: CorsOptions = {}): Middleware<HttpContext> {
     maxAge,
   } = options;
 
+  // 启动时预计算：白名单 O(1) 查找，响应头字符串避免每个请求 join
+  const originSet = Array.isArray(origin) ? new Set(origin) : null;
+  const methodsHeader = methods.join(", ");
+  const allowedHeadersHeader = allowedHeaders.join(", ");
+  const exposedHeadersHeader = exposedHeaders.length > 0
+    ? exposedHeaders.join(", ")
+    : "";
+  const maxAgeHeader = maxAge !== undefined ? String(maxAge) : undefined;
+
+  const originAllowed = (requestOrigin: string): boolean => {
+    if (typeof origin === "string") {
+      return requestOrigin === origin;
+    }
+    if (originSet) {
+      return originSet.has(requestOrigin);
+    }
+    if (typeof origin === "function") {
+      return origin(requestOrigin);
+    }
+    return false;
+  };
+
   return async (ctx: HttpContext, next: () => Promise<void>): Promise<void> => {
     const requestOrigin = ctx.headers.get("Origin");
 
@@ -59,14 +81,14 @@ export function cors(options: CorsOptions = {}): Middleware<HttpContext> {
       const headers = new Headers();
 
       // 设置 Access-Control-Allow-Origin
-      if (requestOrigin && isOriginAllowed(requestOrigin, origin)) {
+      if (requestOrigin && originAllowed(requestOrigin)) {
         headers.set("Access-Control-Allow-Origin", requestOrigin);
       } else if (origin === "*") {
         headers.set("Access-Control-Allow-Origin", "*");
       }
 
       // 设置 Access-Control-Allow-Methods
-      headers.set("Access-Control-Allow-Methods", methods.join(", "));
+      headers.set("Access-Control-Allow-Methods", methodsHeader);
 
       // 设置 Access-Control-Allow-Headers
       const requestedHeaders = ctx.headers.get(
@@ -75,12 +97,12 @@ export function cors(options: CorsOptions = {}): Middleware<HttpContext> {
       if (requestedHeaders) {
         headers.set("Access-Control-Allow-Headers", requestedHeaders);
       } else {
-        headers.set("Access-Control-Allow-Headers", allowedHeaders.join(", "));
+        headers.set("Access-Control-Allow-Headers", allowedHeadersHeader);
       }
 
       // 设置 Access-Control-Expose-Headers
-      if (exposedHeaders.length > 0) {
-        headers.set("Access-Control-Expose-Headers", exposedHeaders.join(", "));
+      if (exposedHeadersHeader) {
+        headers.set("Access-Control-Expose-Headers", exposedHeadersHeader);
       }
 
       // 设置 Access-Control-Allow-Credentials
@@ -89,8 +111,8 @@ export function cors(options: CorsOptions = {}): Middleware<HttpContext> {
       }
 
       // 设置 Access-Control-Max-Age
-      if (maxAge !== undefined) {
-        headers.set("Access-Control-Max-Age", String(maxAge));
+      if (maxAgeHeader !== undefined) {
+        headers.set("Access-Control-Max-Age", maxAgeHeader);
       }
 
       ctx.response = new Response(null, { status: 204, headers });
@@ -104,15 +126,15 @@ export function cors(options: CorsOptions = {}): Middleware<HttpContext> {
       const headers = new Headers(ctx.response.headers);
 
       // 设置 Access-Control-Allow-Origin
-      if (requestOrigin && isOriginAllowed(requestOrigin, origin)) {
+      if (requestOrigin && originAllowed(requestOrigin)) {
         headers.set("Access-Control-Allow-Origin", requestOrigin);
       } else if (origin === "*") {
         headers.set("Access-Control-Allow-Origin", "*");
       }
 
       // 设置 Access-Control-Expose-Headers
-      if (exposedHeaders.length > 0) {
-        headers.set("Access-Control-Expose-Headers", exposedHeaders.join(", "));
+      if (exposedHeadersHeader) {
+        headers.set("Access-Control-Expose-Headers", exposedHeadersHeader);
       }
 
       // 设置 Access-Control-Allow-Credentials
@@ -127,30 +149,4 @@ export function cors(options: CorsOptions = {}): Middleware<HttpContext> {
       });
     }
   };
-}
-
-/**
- * 检查源是否被允许
- *
- * @param requestOrigin 请求的源
- * @param allowedOrigin 允许的源配置
- * @returns 是否允许
- */
-function isOriginAllowed(
-  requestOrigin: string,
-  allowedOrigin: string | string[] | ((origin: string) => boolean),
-): boolean {
-  if (typeof allowedOrigin === "string") {
-    return requestOrigin === allowedOrigin;
-  }
-
-  if (Array.isArray(allowedOrigin)) {
-    return allowedOrigin.includes(requestOrigin);
-  }
-
-  if (typeof allowedOrigin === "function") {
-    return allowedOrigin(requestOrigin);
-  }
-
-  return false;
 }

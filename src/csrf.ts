@@ -74,9 +74,10 @@ function generateRandomToken(length: number = 32): string {
  * @param ctx HTTP 上下文
  * @returns 是否应该跳过
  */
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
 function defaultShouldSkip(ctx: HttpContext): boolean {
-  const safeMethods = ["GET", "HEAD", "OPTIONS"];
-  return safeMethods.includes(ctx.method);
+  return SAFE_METHODS.has(ctx.method);
 }
 
 /**

@@ -7,6 +7,34 @@
 
 ---
 
+## [Unreleased]
+
+## [1.1.1] - 2026-11-23
+
+### 新增
+
+- **拒绝入站 Brotli 请求**：新增 `rejectBrotliRequest`（及
+  `contentEncodingIncludesBr`）。请求 `Content-Encoding` 含 `br` 时默认返回
+  415，可按选项放行。这是请求侧防护（HTTP2Shell /
+  CVE-2026-111497），不负责解压；响应压缩仍独立。
+
+### 安全
+
+- **静态文件路径边界**：拒绝 URL 中的 `..` 穿越与 NUL；用 `realpath`
+  笼子把解析后的路径限制在根目录内，符号链接指向根外时返回 403。
+- **限流默认不信转发头**：`rateLimit` 默认忽略 `X-Forwarded-For` / `X-Real-IP` /
+  `cf-connecting-ip`，仅在 `trustProxy: true` 时按第一跳转发头分桶。
+
+### 性能
+
+- CORS 白名单改为启动时预建 `Set`（O(1) 查找），并预计算 Allow-Methods / Headers
+  等响应头字符串。安全方法判断改用 `Set`。无动态策略时预计算安全头列表。
+
+### 变更
+
+- 依赖升级：`@dreamer/server` `^1.3.4` → `^1.3.5`，`@dreamer/runtime-adapter`
+  `^1.2.2` → `^1.2.3`。
+
 ## [1.1.0] - 2026-07-23
 
 ### 新增
@@ -17,8 +45,8 @@
 - **Node.js 测试基础设施**：`test-node.mjs` 测试运行器（主进程内执行，无
   fork/IPC）、`tsconfig.json`（Bundler 模块解析）、deno.json 与 package.json 的
   `test:node` 脚本。
-- **9-job CI 矩阵**：3 Deno v2.9 + 3 Bun + 3 Node 22（Linux/macOS/Windows）。
-  从 6-job（Deno v2.5 + Bun）升级。无 Chromium、无外部服务。
+- **9-job CI 矩阵**：3 Deno v2.9 + 3 Bun + 3 Node 22（Linux/macOS/Windows）。 从
+  6-job（Deno v2.5 + Bun）升级。无 Chromium、无外部服务。
 - package.json 新增 `engines.node: ">=22"`。
 - deno.json 新增 `minimumDependencyAge: "0"`（全局 JSR 依赖解析）。
 - `.gitignore` 忽略 `package-lock.json`。
@@ -32,12 +60,12 @@
 ### 说明
 
 - **src 运行时无关**：零 `Deno.*` API 调用、零 `IS_NODE` 检查——纯逻辑 + 跨运行时
-  Web API。Node.js 支持无需任何源码改动，运行时差异全部经 `@dreamer/runtime-adapter`
-  抽象。
+  Web API。Node.js 支持无需任何源码改动，运行时差异全部经
+  `@dreamer/runtime-adapter` 抽象。
 - 测试断言 locale 安全：`csrf.test.ts` 与 `request-validator.test.ts` 使用
   `setMiddlewaresLocale("en-US")` 锁定英文断言（CI 安全）。
-- `performance-analyzer.ts` 的 `location.reload()` 是客户端 `<script>` HTML 输出，
-  非服务端代码——无需 Node.js 守卫。
+- `performance-analyzer.ts` 的 `location.reload()` 是客户端 `<script>` HTML
+  输出， 非服务端代码——无需 Node.js 守卫。
 - `rate-limit.ts` 的 `setInterval` 类型为隐式推断；`clearInterval` 三端通用。
 
 ---

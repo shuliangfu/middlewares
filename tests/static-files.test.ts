@@ -6,6 +6,7 @@ import {
   join,
   makeTempDir,
   remove,
+  symlink,
   writeTextFile,
 } from "@dreamer/runtime-adapter";
 import { afterAll, beforeAll, describe, expect, it } from "@dreamer/test";
@@ -208,6 +209,59 @@ describe("Static Files 中间件", () => {
 
       // 清理
       await remove(testFile2);
+    });
+  });
+
+  describe("路径边界", () => {
+    it("应拒绝 URL 中的 .. 穿越", async () => {
+      const middleware = staticFiles({
+        root: testDir,
+        prefix: "/static",
+        enableCache: false,
+      });
+      const request = new Request("http://localhost:8000/static/test.txt");
+      const context = createTestContext(request);
+      context.path = "/static/../secret.txt";
+      await middleware(context, async () => {});
+      expect(context.response?.status).toBe(403);
+    });
+
+    it("应拒绝含 NUL 的路径", async () => {
+      const middleware = staticFiles({
+        root: testDir,
+        prefix: "/static",
+        enableCache: false,
+      });
+      const request = new Request("http://localhost:8000/static/test.txt");
+      const context = createTestContext(request);
+      context.path = "/static/te\0st.txt";
+      await middleware(context, async () => {});
+      expect(context.response?.status).toBe(403);
+    });
+
+    it("符号链接指向根外时应返回 403", async () => {
+      const outsideDir = await makeTempDir({ prefix: "static-files-out-" });
+      const secret = join(outsideDir, "secret.txt");
+      await writeTextFile(secret, "secret");
+      const link = join(testDir, "escape");
+      try {
+        await symlink(outsideDir, link);
+      } catch {
+        await remove(outsideDir, { recursive: true });
+        return;
+      }
+      const middleware = staticFiles({
+        root: testDir,
+        prefix: "/static",
+        enableCache: false,
+      });
+      const request = new Request(
+        "http://localhost:8000/static/escape/secret.txt",
+      );
+      const context = createTestContext(request);
+      await middleware(context, async () => {});
+      expect(context.response?.status).toBe(403);
+      await remove(outsideDir, { recursive: true });
     });
   });
 });

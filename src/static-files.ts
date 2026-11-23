@@ -8,9 +8,12 @@
 import type { Middleware } from "@dreamer/middleware";
 import {
   basename,
+  dirname,
   extname,
   join,
   readFile,
+  realPathSync,
+  resolve,
   stat,
 } from "@dreamer/runtime-adapter";
 import type { HttpContext } from "@dreamer/server";
@@ -58,6 +61,67 @@ export interface StaticFilesOptions {
  * app.use(staticFiles({ root: "./public", prefix: "/static" }));
  * ```
  */
+function normalizePathSep(path: string): string {
+  return path.replace(/\\/g, "/");
+}
+
+function isWindowsAbs(path: string): boolean {
+  return /^[A-Za-z]:[\\/]/.test(path);
+}
+
+/** realpath；路径尚不存在时向上解析已存在前缀再拼回缺失段。 */
+function realPathWithMissingSegments(absolute: string): string {
+  const resolved = resolve(absolute);
+  try {
+    return realPathSync(resolved);
+  } catch {
+    // 末级或中间目录尚不存在
+  }
+  const tail: string[] = [];
+  let current = resolved;
+  for (let i = 0; i < 1024; i++) {
+    try {
+      let out = realPathSync(current);
+      for (const seg of tail) {
+        out = join(out, seg);
+      }
+      return out;
+    } catch {
+      const parent = dirname(current);
+      const base = basename(current);
+      if (parent === current || !base) {
+        return resolved;
+      }
+      tail.unshift(base);
+      current = parent;
+    }
+  }
+  return resolved;
+}
+
+function isCanonicalWithinRoot(
+  candidateReal: string,
+  rootReal: string,
+): boolean {
+  const a = normalizePathSep(candidateReal);
+  const b = normalizePathSep(rootReal).replace(/\/+$/, "");
+  if (isWindowsAbs(candidateReal) || isWindowsAbs(rootReal)) {
+    const al = a.toLowerCase();
+    const bl = b.toLowerCase();
+    return al === bl || al.startsWith(bl + "/");
+  }
+  return a === b || a.startsWith(b + "/");
+}
+
+/** 拒绝 URL 剩余段中的 `..`、NUL、绝对路径。 */
+export function isUnsafeStaticRemainder(filePath: string): boolean {
+  if (!filePath) return false;
+  if (filePath.includes("\0") || filePath.includes("..")) return true;
+  if (filePath.startsWith("/") || isWindowsAbs(filePath)) return true;
+  if (filePath.includes("\\")) return true;
+  return false;
+}
+
 // 全局文件缓存（每个配置一个实例）
 const cacheInstances = new Map<string, FileCache>();
 
@@ -113,6 +177,13 @@ export function staticFiles(
       filePath = "";
     }
 
+    if (isUnsafeStaticRemainder(filePath)) {
+      ctx.response = new Response($tr("middlewares.staticFiles.forbidden"), {
+        status: 403,
+      });
+      return;
+    }
+
     // 检查点文件
     if (basename(filePath).startsWith(".")) {
       if (dotfiles === "deny") {
@@ -128,8 +199,17 @@ export function staticFiles(
     }
 
     try {
-      // 构建完整文件路径
-      let fullPath = join(root, filePath);
+      // 构建完整文件路径，并用 realpath 笼子限制在根目录内
+      const rootReal = realPathWithMissingSegments(resolve(root));
+      let fullPath = join(rootReal, filePath);
+      const fullReal = realPathWithMissingSegments(fullPath);
+      if (!isCanonicalWithinRoot(fullReal, rootReal)) {
+        ctx.response = new Response($tr("middlewares.staticFiles.forbidden"), {
+          status: 403,
+        });
+        return;
+      }
+      fullPath = fullReal;
 
       // 检查文件是否存在
       let fileStat = await stat(fullPath);
@@ -144,7 +224,15 @@ export function staticFiles(
           try {
             const indexStat = await stat(indexPath);
             if (indexStat.isFile) {
-              fullPath = indexPath;
+              const indexReal = realPathWithMissingSegments(indexPath);
+              if (!isCanonicalWithinRoot(indexReal, rootReal)) {
+                ctx.response = new Response(
+                  $tr("middlewares.staticFiles.forbidden"),
+                  { status: 403 },
+                );
+                return;
+              }
+              fullPath = indexReal;
               fileStat = indexStat;
               found = true;
               break;

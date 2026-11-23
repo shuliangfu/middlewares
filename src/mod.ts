@@ -3,7 +3,7 @@
  *
  * 内置 HTTP 中间件包入口。提供 body 解析、压缩、CORS、CSRF、错误处理、健康检查、
  * 指标、性能分析、限流、Request ID、请求日志、签名、校验、响应缓存、安全头、
- * 静态文件与超时等中间件，兼容 @dreamer/server 及基于 HttpContext 的框架。
+ * 静态文件、拒绝入站 Brotli 请求与超时等中间件，兼容 @dreamer/server 及基于 HttpContext 的框架。
  *
  * @see {@link bodyParser} - 请求体解析（JSON / 表单 / 文本 / 原始）
  * @see {@link compression} - 响应压缩（gzip / Brotli）
@@ -34,6 +34,11 @@ export {
   type PerformanceAnalyzerOptions,
 } from "./performance-analyzer.ts";
 export { rateLimit, type RateLimitOptions } from "./rate-limit.ts";
+export {
+  contentEncodingIncludesBr,
+  rejectBrotliRequest,
+  type RejectBrotliRequestOptions,
+} from "./reject-brotli-request.ts";
 export { requestId, type RequestIdOptions } from "./request-id.ts";
 export { requestLogger, type RequestLoggerOptions } from "./request-logger.ts";
 export {

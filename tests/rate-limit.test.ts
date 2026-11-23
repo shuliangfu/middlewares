@@ -3,7 +3,7 @@
  */
 
 import { afterEach, describe, expect, it } from "@dreamer/test";
-import { rateLimit } from "../src/rate-limit.ts";
+import { defaultRateLimitKey, rateLimit } from "../src/rate-limit.ts";
 import { createTestContext } from "./helpers.ts";
 
 // 存储所有创建的中间件实例，用于清理
@@ -146,6 +146,67 @@ describe("Rate Limit 中间件", () => {
 
       // rate-limit 中间件不自动添加响应头，需要手动添加
       expect(context.response).toBeDefined();
+    });
+  });
+
+  describe("trustProxy", () => {
+    it("默认不信任 X-Forwarded-For（伪造头不会拆开限流桶）", async () => {
+      const middleware = rateLimit({
+        windowMs: 60000,
+        max: 1,
+      });
+      middlewareInstances.push(middleware);
+
+      const requestA = new Request("http://localhost:8000/api", {
+        headers: { "X-Forwarded-For": "1.1.1.1" },
+      });
+      const requestB = new Request("http://localhost:8000/api", {
+        headers: { "X-Forwarded-For": "2.2.2.2" },
+      });
+      const context1 = createTestContext(requestA);
+      await middleware(context1, async () => {});
+
+      const context2 = createTestContext(requestB);
+      let nextCalled = false;
+      await middleware(context2, async () => {
+        nextCalled = true;
+      });
+      expect(nextCalled).toBe(false);
+      expect(context2.response?.status).toBe(429);
+    });
+
+    it("trustProxy: true 时按第一跳 X-Forwarded-For 分桶", async () => {
+      const middleware = rateLimit({
+        windowMs: 60000,
+        max: 1,
+        trustProxy: true,
+      });
+      middlewareInstances.push(middleware);
+
+      const requestA = new Request("http://localhost:8000/api", {
+        headers: { "X-Forwarded-For": "1.1.1.1, 10.0.0.1" },
+      });
+      const requestB = new Request("http://localhost:8000/api", {
+        headers: { "X-Forwarded-For": "2.2.2.2, 10.0.0.1" },
+      });
+      const context1 = createTestContext(requestA);
+      await middleware(context1, async () => {});
+
+      const context2 = createTestContext(requestB);
+      let nextCalled = false;
+      await middleware(context2, async () => {
+        nextCalled = true;
+      });
+      expect(nextCalled).toBe(true);
+    });
+
+    it("defaultRateLimitKey 在 trustProxy false 时忽略转发头", () => {
+      const request = new Request("http://evil.example:8000/api", {
+        headers: { "X-Forwarded-For": "9.9.9.9", "X-Real-IP": "8.8.8.8" },
+      });
+      const ctx = createTestContext(request);
+      expect(defaultRateLimitKey(ctx, false)).toBe("unknown");
+      expect(defaultRateLimitKey(ctx, true)).toBe("9.9.9.9");
     });
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@dreamer/middlewares",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "Apache-2.0",
   "description": "兼容 Deno 和 Bun 的 HTTP 中间件库，可与 @dreamer/server 或 HttpContext 兼容框架无缝集成",
   "exports": {
@@ -39,12 +39,12 @@
     ]
   },
   "imports": {
-    "@dreamer/i18n": "jsr:@dreamer/i18n@^1.1.2",
-    "@dreamer/server": "jsr:@dreamer/server@^1.2.1",
+    "@dreamer/i18n": "jsr:@dreamer/i18n@^1.1.3",
+    "@dreamer/server": "jsr:@dreamer/server@^1.3.5",
     "@dreamer/middleware": "jsr:@dreamer/middleware@^1.1.0",
-    "@dreamer/logger": "jsr:@dreamer/logger@^1.1.0",
-    "@dreamer/test": "jsr:@dreamer/test@^1.2.3",
-    "@dreamer/runtime-adapter": "jsr:@dreamer/runtime-adapter@^1.2.2",
+    "@dreamer/logger": "jsr:@dreamer/logger@^1.1.1",
+    "@dreamer/test": "jsr:@dreamer/test@^1.2.5",
+    "@dreamer/runtime-adapter": "jsr:@dreamer/runtime-adapter@^1.2.3",
     "brotli": "npm:brotli@1.3.3",
     "pako": "npm:pako@2.1.0"
   },

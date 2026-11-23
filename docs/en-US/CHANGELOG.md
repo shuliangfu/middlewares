@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+## [1.1.1] - 2026-11-23
+
+### Added
+
+- **Reject inbound Brotli requests**: new `rejectBrotliRequest` (and
+  `contentEncodingIncludesBr`). Requests whose `Content-Encoding` includes `br`
+  now receive 415 by default, with an opt-in to allow them. This is a
+  request-side guard (HTTP2Shell / CVE-2026-111497); it does not decompress.
+  Response compression remains separate.
+
+### Security
+
+- **Static file path boundary**: reject `..` traversal and NUL in the URL;
+  resolve paths with a `realpath` cage so a symlink that points outside the root
+  returns 403.
+- **Rate limit does not trust forwarded headers by default**: `rateLimit`
+  ignores `X-Forwarded-For` / `X-Real-IP` / `cf-connecting-ip` unless
+  `trustProxy: true`, in which case the first hop is used as the bucket key.
+
+### Performance
+
+- CORS origin allowlists use a startup `Set` for O(1) lookups, and precompute
+  Allow-Methods / Headers strings. Safe CSRF methods use a `Set`. Security
+  header lists are precomputed when no dynamic policy is set.
+
+### Changed
+
+- Dependencies: `@dreamer/server` `^1.3.4` → `^1.3.5`,
+  `@dreamer/runtime-adapter` `^1.2.2` → `^1.2.3`.
+
 ## [1.1.0] - 2026-07-23
 
 ### Added
@@ -15,9 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Bun. All `@dreamer/*` dependencies upgraded to Node-compatible versions
   (runtime-adapter ^1.2.2, server ^1.2.1, i18n ^1.1.2, middleware ^1.1.0, logger
   ^1.1.0, test ^1.2.3).
-- **Node.js test infrastructure**: `test-node.mjs` runner (main-process execution,
-  no fork/IPC), `tsconfig.json` (Bundler module resolution), `test:node` script
-  in deno.json and package.json.
+- **Node.js test infrastructure**: `test-node.mjs` runner (main-process
+  execution, no fork/IPC), `tsconfig.json` (Bundler module resolution),
+  `test:node` script in deno.json and package.json.
 - **9-job CI matrix**: 3 Deno v2.9 + 3 Bun + 3 Node 22 (Linux/macOS/Windows).
   Upgraded from 6-job (Deno v2.5 + Bun only). No Chromium, no external services.
 - `engines.node: ">=22"` in package.json.
@@ -35,13 +67,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **src is runtime-agnostic**: zero `Deno.*` API calls, zero `IS_NODE` checks —
   pure logic + cross-runtime Web API. No source code changes needed for Node.js
-  support; all runtime differences are abstracted through `@dreamer/runtime-adapter`.
-- Test assertions are locale-safe: `csrf.test.ts` and `request-validator.test.ts`
-  use `setMiddlewaresLocale("en-US")` to lock English assertions (CI-safe).
+  support; all runtime differences are abstracted through
+  `@dreamer/runtime-adapter`.
+- Test assertions are locale-safe: `csrf.test.ts` and
+  `request-validator.test.ts` use `setMiddlewaresLocale("en-US")` to lock
+  English assertions (CI-safe).
 - `performance-analyzer.ts` `location.reload()` is client-side `<script>` HTML
   output, not server-side code — no Node.js guard needed.
-- `rate-limit.ts` `setInterval` type is implicitly inferred; `clearInterval` works
-  across all runtimes.
+- `rate-limit.ts` `setInterval` type is implicitly inferred; `clearInterval`
+  works across all runtimes.
 
 ---
 

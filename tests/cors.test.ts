@@ -74,6 +74,37 @@ describe("CORS 中间件", () => {
       );
     });
 
+    it("应该用 origin 数组白名单允许列出的源、拒绝未列出的源", async () => {
+      const middleware = cors({
+        origin: [
+          "https://app.example.com",
+          "https://admin.example.com",
+        ],
+      });
+
+      const allowed = createTestContext(
+        new Request("http://localhost:8000/api", {
+          method: "GET",
+          headers: { Origin: "https://admin.example.com" },
+        }),
+        new Response("OK"),
+      );
+      await middleware(allowed, async () => {});
+      expect(allowed.response?.headers.get("Access-Control-Allow-Origin"))
+        .toBe("https://admin.example.com");
+
+      const denied = createTestContext(
+        new Request("http://localhost:8000/api", {
+          method: "GET",
+          headers: { Origin: "https://evil.example" },
+        }),
+        new Response("OK"),
+      );
+      await middleware(denied, async () => {});
+      expect(denied.response?.headers.get("Access-Control-Allow-Origin"))
+        .toBeNull();
+    });
+
     it("应该支持自定义方法", async () => {
       const middleware = cors({
         methods: ["GET", "POST"],

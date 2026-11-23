@@ -135,6 +135,8 @@ export function securityHeaders(
   }
 
   const { dynamicPolicy } = options;
+  // 无动态策略时在启动阶段预计算响应头列表，请求路径只做写入
+  const staticHeaderList = buildSecurityHeaderList(options);
 
   return async (ctx: HttpContext, next: () => Promise<void>): Promise<void> => {
     // 先执行下一个中间件
@@ -145,124 +147,21 @@ export function securityHeaders(
       return;
     }
 
-    // 应用动态安全策略（如果提供）
-    let finalOptions: SecurityHeadersOptions = options;
-    if (dynamicPolicy) {
-      const dynamicConfig = await dynamicPolicy(ctx);
-      finalOptions = { ...options, ...dynamicConfig };
-    }
+    const headerList = dynamicPolicy
+      ? buildSecurityHeaderList({
+        ...options,
+        ...(await dynamicPolicy(ctx)),
+      })
+      : staticHeaderList;
 
     // 创建新的响应头
     const headers = new Headers(ctx.response.headers);
-
-    // X-Frame-Options（默认：true）
-    const frameOptions = finalOptions.frameOptions ?? true;
-    if (frameOptions) {
-      const value = frameOptions === true ? "DENY" : frameOptions;
-      headers.set("X-Frame-Options", value);
-    }
-
-    // X-Content-Type-Options（默认：true）
-    const contentTypeOptions = finalOptions.contentTypeOptions ?? true;
-    if (contentTypeOptions) {
-      headers.set("X-Content-Type-Options", "nosniff");
-    }
-
-    // X-XSS-Protection（默认：true）
-    const xssProtection = finalOptions.xssProtection ?? true;
-    if (xssProtection) {
-      const value = xssProtection === true ? "1; mode=block" : xssProtection;
-      headers.set("X-XSS-Protection", value);
-    }
-
-    // Referrer-Policy（默认：true）
-    const referrerPolicy = finalOptions.referrerPolicy ?? true;
-    if (referrerPolicy) {
-      const value = referrerPolicy === true
-        ? "strict-origin-when-cross-origin"
-        : referrerPolicy;
-      headers.set("Referrer-Policy", value);
-    }
-
-    // Content-Security-Policy（默认：false）
-    const contentSecurityPolicy = finalOptions.contentSecurityPolicy ?? false;
-    if (contentSecurityPolicy) {
-      const value = contentSecurityPolicy === true
-        ? "default-src 'self'"
-        : contentSecurityPolicy;
-      headers.set("Content-Security-Policy", value);
-    }
-
-    // Strict-Transport-Security（默认：false，仅 HTTPS）
-    const strictTransportSecurity = finalOptions.strictTransportSecurity ??
-      false;
-    if (strictTransportSecurity && ctx.url.protocol === "https:") {
-      const value = strictTransportSecurity === true
-        ? "max-age=31536000; includeSubDomains"
-        : strictTransportSecurity;
-      headers.set("Strict-Transport-Security", value);
-    }
-
-    // Permissions-Policy（默认：false）
-    const permissionsPolicy = finalOptions.permissionsPolicy ?? false;
-    if (permissionsPolicy) {
-      const value = permissionsPolicy === true
-        ? "geolocation=(), microphone=(), camera=()"
-        : permissionsPolicy;
-      headers.set("Permissions-Policy", value);
-    }
-
-    // Cross-Origin-Embedder-Policy（默认：false）
-    const crossOriginEmbedderPolicy = finalOptions.crossOriginEmbedderPolicy ??
-      false;
-    if (crossOriginEmbedderPolicy) {
-      const value = crossOriginEmbedderPolicy === true
-        ? "require-corp"
-        : crossOriginEmbedderPolicy;
-      headers.set("Cross-Origin-Embedder-Policy", value);
-    }
-
-    // Cross-Origin-Opener-Policy（默认：false）
-    const crossOriginOpenerPolicy = finalOptions.crossOriginOpenerPolicy ??
-      false;
-    if (crossOriginOpenerPolicy) {
-      const value = crossOriginOpenerPolicy === true
-        ? "same-origin"
-        : crossOriginOpenerPolicy;
-      headers.set("Cross-Origin-Opener-Policy", value);
-    }
-
-    // Cross-Origin-Resource-Policy（默认：false）
-    const crossOriginResourcePolicy = finalOptions.crossOriginResourcePolicy ??
-      false;
-    if (crossOriginResourcePolicy) {
-      const value = crossOriginResourcePolicy === true
-        ? "same-origin"
-        : crossOriginResourcePolicy;
-      headers.set("Cross-Origin-Resource-Policy", value);
-    }
-
-    // X-DNS-Prefetch-Control（默认：false）
-    const dnsPrefetchControl = finalOptions.dnsPrefetchControl ?? false;
-    if (dnsPrefetchControl) {
-      const value = dnsPrefetchControl === true ? "on" : dnsPrefetchControl;
-      headers.set("X-DNS-Prefetch-Control", value);
-    }
-
-    // X-Download-Options（默认：false）
-    const downloadOptions = finalOptions.downloadOptions ?? false;
-    if (downloadOptions) {
-      headers.set("X-Download-Options", "noopen");
-    }
-
-    // X-Permitted-Cross-Domain-Policies（默认：false）
-    const permittedCrossDomainPolicies =
-      finalOptions.permittedCrossDomainPolicies ?? false;
-    if (permittedCrossDomainPolicies) {
-      const value = permittedCrossDomainPolicies === true
-        ? "none"
-        : permittedCrossDomainPolicies;
-      headers.set("X-Permitted-Cross-Domain-Policies", value);
+    const isHttps = ctx.url.protocol === "https:";
+    for (const [name, value] of headerList) {
+      if (name === "Strict-Transport-Security" && !isHttps) {
+        continue;
+      }
+      headers.set(name, value);
     }
 
     // 更新响应
@@ -272,4 +171,132 @@ export function securityHeaders(
       headers,
     });
   };
+}
+
+/**
+ * 根据配置生成要写入的安全头列表（HSTS 是否实际写入仍取决于请求是否 HTTPS）。
+ */
+function buildSecurityHeaderList(
+  finalOptions: SecurityHeadersOptions,
+): Array<[string, string]> {
+  const headers: Array<[string, string]> = [];
+
+  const frameOptions = finalOptions.frameOptions ?? true;
+  if (frameOptions) {
+    headers.push([
+      "X-Frame-Options",
+      frameOptions === true ? "DENY" : frameOptions,
+    ]);
+  }
+
+  const contentTypeOptions = finalOptions.contentTypeOptions ?? true;
+  if (contentTypeOptions) {
+    headers.push(["X-Content-Type-Options", "nosniff"]);
+  }
+
+  const xssProtection = finalOptions.xssProtection ?? true;
+  if (xssProtection) {
+    headers.push([
+      "X-XSS-Protection",
+      xssProtection === true ? "1; mode=block" : xssProtection,
+    ]);
+  }
+
+  const referrerPolicy = finalOptions.referrerPolicy ?? true;
+  if (referrerPolicy) {
+    headers.push([
+      "Referrer-Policy",
+      referrerPolicy === true
+        ? "strict-origin-when-cross-origin"
+        : referrerPolicy,
+    ]);
+  }
+
+  const contentSecurityPolicy = finalOptions.contentSecurityPolicy ?? false;
+  if (contentSecurityPolicy) {
+    headers.push([
+      "Content-Security-Policy",
+      contentSecurityPolicy === true
+        ? "default-src 'self'"
+        : contentSecurityPolicy,
+    ]);
+  }
+
+  const strictTransportSecurity = finalOptions.strictTransportSecurity ?? false;
+  if (strictTransportSecurity) {
+    headers.push([
+      "Strict-Transport-Security",
+      strictTransportSecurity === true
+        ? "max-age=31536000; includeSubDomains"
+        : strictTransportSecurity,
+    ]);
+  }
+
+  const permissionsPolicy = finalOptions.permissionsPolicy ?? false;
+  if (permissionsPolicy) {
+    headers.push([
+      "Permissions-Policy",
+      permissionsPolicy === true
+        ? "geolocation=(), microphone=(), camera=()"
+        : permissionsPolicy,
+    ]);
+  }
+
+  const crossOriginEmbedderPolicy = finalOptions.crossOriginEmbedderPolicy ??
+    false;
+  if (crossOriginEmbedderPolicy) {
+    headers.push([
+      "Cross-Origin-Embedder-Policy",
+      crossOriginEmbedderPolicy === true
+        ? "require-corp"
+        : crossOriginEmbedderPolicy,
+    ]);
+  }
+
+  const crossOriginOpenerPolicy = finalOptions.crossOriginOpenerPolicy ?? false;
+  if (crossOriginOpenerPolicy) {
+    headers.push([
+      "Cross-Origin-Opener-Policy",
+      crossOriginOpenerPolicy === true
+        ? "same-origin"
+        : crossOriginOpenerPolicy,
+    ]);
+  }
+
+  const crossOriginResourcePolicy = finalOptions.crossOriginResourcePolicy ??
+    false;
+  if (crossOriginResourcePolicy) {
+    headers.push([
+      "Cross-Origin-Resource-Policy",
+      crossOriginResourcePolicy === true
+        ? "same-origin"
+        : crossOriginResourcePolicy,
+    ]);
+  }
+
+  const dnsPrefetchControl = finalOptions.dnsPrefetchControl ?? false;
+  if (dnsPrefetchControl) {
+    headers.push([
+      "X-DNS-Prefetch-Control",
+      dnsPrefetchControl === true ? "on" : dnsPrefetchControl,
+    ]);
+  }
+
+  const downloadOptions = finalOptions.downloadOptions ?? false;
+  if (downloadOptions) {
+    headers.push(["X-Download-Options", "noopen"]);
+  }
+
+  const permittedCrossDomainPolicies =
+    finalOptions.permittedCrossDomainPolicies ?? false;
+  if (permittedCrossDomainPolicies) {
+    headers.push([
+      "X-Permitted-Cross-Domain-Policies",
+      permittedCrossDomainPolicies === true
+        ? "none"
+        : permittedCrossDomainPolicies,
+    ]);
+  }
+
+  return headers;
 }
